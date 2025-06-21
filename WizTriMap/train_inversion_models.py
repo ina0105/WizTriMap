@@ -15,6 +15,7 @@ from torchvision import transforms
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 from models import ConvDecoderGrayV2, ConvDecoderV2, combined_ssim_mse_loss
+from utils import load_dataset, save_image, project
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
@@ -23,70 +24,13 @@ from torch.utils.data import DataLoader, TensorDataset
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # === Config ===
-DATASETS = ["CIFAR100", "MNIST", "FashionMNIST"]
+DATASETS = ["CIFAR100", "FashionMNIST", "MNIST"]
 METHODS_2D = ["TriMap", "UMAP", "t-SNE", "PCA"]
 
-# ===Save Image ===
-def save_image(img_array, path, resize_factor=4, interpolation=Image.NEAREST):
-    """
-    Save grayscale or RGB image with optional resizing.
-
-    Args:
-        img_array: numpy array in [0,1], shape (H,W) or (H,W,3)
-        path: output file path
-        resize_factor: scale up by this factor (e.g., 4 x 32 = 128 x 128)
-        interpolation: PIL.Image resize mode (e.g., NEAREST or BILINEAR)
-    """
-    img_array = np.clip(img_array, 0, 1)
-    
-    if img_array.ndim == 2:
-        img_uint8 = (img_array * 255).astype(np.uint8)
-        im = Image.fromarray(img_uint8, mode='L')
-    elif img_array.ndim == 3:
-        img_uint8 = (img_array * 255).astype(np.uint8)
-        im = Image.fromarray(img_uint8)
-    else:
-        raise ValueError(f"Unsupported image shape: {img_array.shape}")
-
-    if resize_factor > 1:
-        new_size = (im.width * resize_factor, im.height * resize_factor)
-        im = im.resize(new_size, interpolation)
-
-    im.save(path)
-
-# === Projection Functions ===
-def project(name, method, X_flat, dim=2):
-    if method == "TriMap":
-        return trimap.TRIMAP(n_dims=dim).fit_transform(X_flat)
-    elif method == "UMAP":
-        return umap.UMAP(n_components=dim).fit_transform(X_flat)
-    elif method == "t-SNE":
-        return TSNE(n_components=dim).fit_transform(X_flat)
-    elif method == "PCA":
-        return PCA(n_components=dim).fit_transform(X_flat)
-    else:
-        raise ValueError("Unknown method")
-
-# === Dataset Loader ===
-def load_dataset(name):
-    transform = transforms.ToTensor()
-    if name == "MNIST":
-        dataset = MNIST("./data", train=True, download=True, transform=transform)
-        X = torch.stack([img[0].squeeze() for img in dataset])
-    elif name == "FashionMNIST":
-        dataset = FashionMNIST("./data", train=True, download=True, transform=transform)
-        X = torch.stack([img[0].squeeze() for img in dataset])
-    elif name == "CIFAR100":
-        dataset = CIFAR100("./data", train=True, download=True, transform=transform)
-        X = torch.stack([img[0] for img in dataset])
-    else:
-        raise ValueError("Invalid dataset")
-
-    X_flat = X.view(X.size(0), -1).numpy()
-    return X, X_flat
 
 # === Training Function ===
-def train_model(X_tensor, embedding, model, loss_fn, save_path, epochs, method, dataset, dim, visualize=False):
+def train_model(X_tensor, embedding, model, loss_fn, save_path, epochs, method, dataset, dim, 
+                learning_rate=0.0001, train_batch_size=64, val_batch_size=64, patience=30, visualize=False):
     # Convert full tensors
     embedding_tensor = torch.tensor(embedding, dtype=torch.float32)
     image_tensor = X_tensor.cpu()   # Keep on CPU until batching to GPU
@@ -97,17 +41,17 @@ def train_model(X_tensor, embedding, model, loss_fn, save_path, epochs, method, 
     train_ds = TensorDataset(embedding_tensor[train_idx], image_tensor[train_idx])
     val_ds = TensorDataset(embedding_tensor[val_idx], image_tensor[val_idx])
     
-    train_loader = DataLoader(train_ds, batch_size=256, shuffle=True)
-    val_loader = DataLoader(val_ds, batch_size=512)
+    train_loader = DataLoader(train_ds, batch_size=train_batch_size, shuffle=True)
+    val_loader = DataLoader(val_ds, batch_size=val_batch_size)
 
-    optimizer = optim.Adam(model.parameters(), lr=0.0001, weight_decay=1e-4)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=30)
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-4)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=10, verbose=False)
 
     best_val_loss = float("inf")
     best_state_dict = None
 
     vis_dir = Path("recon_viz") / dataset / method
-    if visualize: #and method == "TriMap"
+    if visualize:
         vis_dir.mkdir(parents=True, exist_ok=True)
 
     for epoch in tqdm(range(epochs), desc=f"Training {os.path.basename(save_path)}"):
@@ -147,20 +91,19 @@ def train_model(X_tensor, embedding, model, loss_fn, save_path, epochs, method, 
             best_val_loss = avg_val_loss
             best_state_dict = model.state_dict()
 
-        # Visualization every 10 epochs for TriMap
-        if visualize and (epoch + 1) % 100 == 0: #and method == "TriMap"
+        # Visualization every 100 epochs
+        if visualize and (epoch + 1) % 100 == 0:
             # === Reconstructed Image ===
-            sample_latent = embedding_tensor[val_idx[0]:val_idx[0]+1].to(device)
+            sample_latent = embedding_tensor[val_idx[10]:val_idx[10]+1].to(device)
             with torch.no_grad():
                 recon_img = model(sample_latent).cpu().numpy()
 
             if recon_img.shape[1] == 1:
-                img = recon_img[0, 0]  # (1, H, W) -> (H, W)
+                img = recon_img[0, 0]
             else:
-                img = recon_img[0].transpose(1, 2, 0)  # (3, H, W) -> (H, W, 3)
+                img = recon_img[0].transpose(1, 2, 0)
 
             recon_vis = (img - img.min()) / (img.max() - img.min() + 1e-5)
-            #print(f"[DEBUG] Epoch {epoch+1} | Recon min={img.min():.4f}, max={img.max():.4f}, shape={img.shape}")
             save_image(recon_vis, vis_dir / f"{dataset}_{method}_{dim}D_epoch{epoch+1}_recon.png", resize_factor=8)
 
             # === Original Image ===
@@ -169,8 +112,6 @@ def train_model(X_tensor, embedding, model, loss_fn, save_path, epochs, method, 
                 original_img = original[0]
             else:
                 original_img = original.transpose(1, 2, 0)
-
-            #print(f"[DEBUG] Epoch {epoch+1} | Orig  min={original_img.min():.4f}, max={original_img.max():.4f}, shape={original_img.shape}")
             save_image(original_img, vis_dir / f"{dataset}_{method}_{dim}D_epoch{epoch+1}_original.png", resize_factor=8)
 
     # Final eval on val set using best model
@@ -198,18 +139,18 @@ def main(args):
     os.makedirs(args.save_dir, exist_ok=True)
     recon_errors = {}
 
-    TRIMAP_DIMS = list(range(2, args.ndims+1))  # 2D to 10D
+    TRIMAP_DIMS = [2**i for i in range(2, args.ndims + 1)] #list(range(2, args.ndims+1))   2D to 10D
 
     for dataset in DATASETS:
         print(f"\nLoading full dataset: {dataset}")
-        X, X_flat = load_dataset(dataset)
+        X, X_flat, _ = load_dataset(dataset, train=True)
         X_tensor = torch.tensor(X_flat, dtype=torch.float32).to(device)
 
         for method in METHODS_2D:
             dims = TRIMAP_DIMS if method == "TriMap" else [2]
             for dim in dims:
                 print(f"Projecting {dataset} using {method} ({dim}D)")
-                emb = project(dataset, method, X_flat, dim)
+                emb = project(method, X_flat, dim)
 
                 save_path = os.path.join(args.save_dir, f"{dataset}_{method}_{dim}D.pth")
 
@@ -225,7 +166,8 @@ def main(args):
                     epochs = args.epochs_mnist
 
                 recon_mse = train_model(X_img, emb, model, loss_fn, save_path,
-                                    epochs, method, dataset, dim, visualize=args.visualize)
+                                    epochs, method, dataset, dim, learning_rate=args.lr, train_batch_size=args.train_batchsize, val_batch_size=args.val_batchsize, 
+                                    patience=40, visualize=args.visualize)
 
                 key = f"{dataset}_{method}_{dim}D"
                 recon_errors[key] = recon_mse
@@ -240,7 +182,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train and save inversion models for DR embeddings")
     parser.add_argument("--epochs-cifar", type=int, default=1000, help="Epochs for CIFAR100 models")
     parser.add_argument("--epochs-mnist", type=int, default=800, help="Epochs for MNIST and FashionMNIST models")
-    parser.add_argument("--ndims", type=int, default=10, help="Max number of dimensions to reduce to for TriMap")
+    parser.add_argument("--ndims", type=int, default=6, help="Number of dimensions in power of 2 to reduce to for TriMap")
+    parser.add_argument("--lr", type=int, default=0.0001, help="Learning rate")
+    parser.add_argument("--train_batchsize", type=int, default=64, help="Training Batch size")
+    parser.add_argument("--val_batchsize", type=int, default=64, help="Validation Batch size")
     parser.add_argument("--save-dir", type=str, default="saved_models", help="Directory to save trained models")
     parser.add_argument("--visualize", action="store_true", help="Enable visualization every 10 epochs (TriMap only)")
 
