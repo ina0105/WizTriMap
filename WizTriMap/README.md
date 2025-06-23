@@ -44,10 +44,8 @@ conda activate WizTrimap
 To access the results as showed in the Demo presentation of this system, one must gain the necessary data in advance, if not the execution time would pose a constraint. The pipeline to the Demo is as follows:
 1. Initial data:
     1.1 
-2. CNN visualisation
-##
-    2.1. Extracting embeddings from three layers of a simple CNN for every Dataset
-## 
+2. CNN visualisation \\
+    2.1. Extracting embeddings from three layers of a simple CNN for every Dataset \\
     2.2 Training inversion models to invert from those embeddings to the original image
 3. Running the Demo
     3.1
