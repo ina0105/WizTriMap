@@ -1,164 +1,55 @@
-# movie-recommender
+# WizTriMap
 
-This project is a movie recommendation system that utilizes collaborative filtering techniques to suggest movies to users based on their preferences and interactions with the dataset.
+In this work, we aim to enhance TriMap by making it more expressive and scalable for practical applications. Our target users include AI practitioners, developers, and machine learning researchers who seek to visually analyze latent spaces, explore data structures, and assess how classifiers separate different classes. To address these needs, we present a user-centered extension of TriMap that introduces new functionalities.
 
 ## Project Structure
 
 ```
-movie-recommender
-├── src
-│   ├── data
-│   │   ├── __init__.py
-│   │   ├── loader.py
-│   │   └── preprocessor.py
-│   ├── features
-│   │   ├── __init__.py
-│   │   ├── user_features.py
-│   │   ├── item_features.py
-│   │   └── advanced_features.py
-│   ├── utils
-│   │   ├── __init__.py
-│   │   └── splitter.py
-│   ├── models
-│   │   └── ranking_models.py
-│   ├── preprocess.py
-│   ├── train_advanced.py
-│   ├── train.py
-│   ├── evaluate_mmr_advanced.py
-│   ├── evaluate.py
-│   ├── evaluate_mmr.py
-│   ├── baseline.py
-│   └── evaluate_advanced.py
-├── data
-│   ├── ratings.dat
-│   ├── movies.dat
-│   └── users.dat
-├── requirements.txt
-├── setup.py
+WizTriMap
+├──
+├── utils
+│   ├── utils.py
+│   └── models.py
+├── cnn
+│   ├── extract_embeddings_cnn.py
+│   └── train_inversion_models_cnn.py
+├── initial data
+│   ├── train_inversion_models.py
+│   ├── save_projections.py
+│   └── run_interference.py
+├── additional experiments
+│   ├── hyperbolic.py
+│   └── hyperbolic-corr-fashionmnist.py
+├── WizTrimap_env.yml
 └── README.md
 ```
-
+## Datasets
+1. MNIST
+    The MNIST database of handwritten digits is one of the most popular image recognition datasets. It contains 60k examples for training and 10k examples for testing.Each example is a 28x28 grayscale image, associated with a label from 10 classes.
+2. FashionMNIST
+    Fashion-MNIST is a dataset of Zalando's article images—consisting of a training set of 60,000 examples and a test set of 10,000 examples. Each example is a 28x28 grayscale image, associated with a label from 10 classes.
+3. CIFAR-100
+    The CIFAR 100 dataset is commonly used for image classification and recognition. The CIFAR-100 dataset consists of 60000 32x32 colour images in 100 classes, with 600 images per class. There are 50000 training images and 10000 test images. 
 ## Installation
 
-To install the required dependencies, run:
+To install the environment with the required dependencies, run:
 ```
-conda env create -f environment.yml
-conda activate recommender
-```
-Or install the requirements:
-
-```
-pip install -r requirements.txt
+conda env create -f WizTrimap_env.yml
+conda activate WizTrimap
 ```
 
-## Full Pipeline
+## Full Pipeline of the Demo
 
-The movie recommendation system follows a complete pipeline:
+To access the results as showed in the Demo presentation of this system, one must gain the necessary data in advance, if not the execution time would pose a constraint. The pipeline to the Demo is as follows:
+1. Initial data:
+    1.1 
+2. CNN visualisation
+    2.1. Extracting embeddings from three layers of a simple CNN for every Dataset
+    2.2 Training inversion models to invert from those embeddings to the original image
+3. Running the Demo
+    3.1
 
-1. **Data Loading**: Load datasets from `data/` directory using [`src/data/loader.py`](src/data/loader.py)
-2. **Data Preprocessing**: Clean and prepare data using [`src/data/preprocessor.py`](src/data/preprocessor.py)
-3. **Feature Engineering**: Generate user and item features using [`src/features/`](src/features/)
-4. **Data Splitting**: Split data chronologically into training/validation/test sets
-5. **Model Training**: Train recommendation models with different approaches
-6. **Evaluation**: Assess model performance using Precision@K, Recall@K, NDCG@K, Diversity, Novelty and Coverage@K metrics for ranking 
 
-## Training Options
+## Additional Dataset
+The code can easily be updated to accomodate other datsets, keeping in mind adding a dataset cannot visualised in real time as the gathering of embeddings and the training of the models will take a prolonged period of time.
 
-The system supports three different training modes, each with increasing complexity:
-
-### 1. Normal Train (Basic LightGBM + LambdaRank)
-Standard collaborative filtering approach using LightGBM with basic user and item features.
-
-**Features included:**
-- Basic user demographics and rating patterns
-- Item popularity and genre information
-- Simple interaction features
-
-**Models:**
-- LightGBM Ranker with lambdarank objective
-- NDCG optimization for ranking quality
-
-**Usage:**
-```bash
-python src/preprocess.py
-python src/train.py
-python src/evaluate.py
-```
-
-**Output:**
-- LightGBM Model: `models/lgbm_model.txt`
-- Metrics: `models/metrics.pkl`
-- Feature importance: `models/feature_importance.csv`
-
-### 2. Advanced Features Train (Enhanced Feature Engineering + Ranking)
-Incorporates advanced feature engineering and learning-to-rank techniques for state-of-the-art recommendations.
-
-**Advanced features include:**
-- **Temporal Features**: Time-based patterns, seasonality, interaction sequences
-- **Statistical Features**: Advanced user/item rating distributions and percentiles
-- **Matrix Factorization**: SVD-based latent factor features
-- **Graph Features**: User-item interaction network properties
-- **Sequence Features**: Rating trends and session-based patterns
-- **Interaction Features**: Complex user-item relationship modeling
-
-**Models:**
-- LightGBM Ranker with lambdarank objective
-- NDCG optimization for ranking quality
-
-**Usage:**
-```bash
-python src/train_advanced.py
-python src/evaluate_advanced.py
-```
-
-**Output:**
-- Advanced processed data: `../data/processed/advanced_preprocessed_data.pkl`
-- Ranking model: `models/lgb_ranker.txt`
-- Advanced evaluation results: `models/advanced_*_metrics_at_10.pkl`
-
-### 3.MMR Re-ranking Pipeline
-
-The system includes an advanced MMR (Maximal Marginal Relevance) re-ranking pipeline that balances relevance and diversity in recommendations. This addresses the common problem where recommendation systems suggest very similar items.
-
-What is MMR?
-
-MMR re-ranking optimizes the trade-off between:
-- **Relevance**: How well items match user preferences (from LightGBM predictions)
-- **Diversity/Novelty**: How different/novel the recommended items are
-
-The MMR formula: `MMR = λ × Relevance + (1-λ) × Diversity`
-
-Where λ controls the balance:
-- λ = 0.3: More diversity-focused recommendations
-- λ = 0.5: Balanced approach
-- λ = 0.7: More relevance-focused recommendations
-
-**Usage:**
-```bash
-python src/evaluate_mmr.py
-python src/evaluate_mmr_advanced.py
-```
-## Data
-The datasets used in this project are:
-
-- [`data/ratings.dat`](data/ratings.dat): Contains user ratings for movies
-- [`data/movies.dat`](data/movies.dat): Contains information about movies
-- [`data/users.dat`](data/users.dat): Contains user demographic information
-
-## Evaluation Metrics
-
-All models are evaluated using:
-- **Precision@K**: Fraction of recommended items that are relevant
-- **Recall@K**: Fraction of relevant items that are recommended  
-- **NDCG@K**: Normalized Discounted Cumulative Gain (ranking quality)
-- **Diversity**: Measures how different the recommended items are from each other
-- **Novelty**: Assesses how unexpected or less popular the recommended items are
-- **Coverage@K**: Proportion of unique items recommended across all users
-
-## Model Outputs
-
-Trained models and results are saved in the `models/` directory:
-- Basic model files and metrics
-- Advanced ranking models and evaluation results
-
-## Perfecto Solana Morenilla
