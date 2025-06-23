@@ -45,8 +45,8 @@ To access the results as showed in the Demo presentation of this system, one mus
 1. Initial data:
     1.1 
 2. CNN visualisation
-    2.1. Extracting embeddings from three layers of a simple CNN for every Dataset
-    <br />
+    2.1. Extracting embeddings from three layers of a simple CNN for every Dataset\
+    
     2.2 Training inversion models to invert from those embeddings to the original image
 3. Running the Demo
     3.1
