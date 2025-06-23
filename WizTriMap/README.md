@@ -30,6 +30,7 @@ WizTriMap
     Fashion-MNIST is a dataset of Zalando's article images—consisting of a training set of 60,000 examples and a test set of 10,000 examples. Each example is a 28x28 grayscale image, associated with a label from 10 classes.
 3. CIFAR-100
     The CIFAR 100 dataset is commonly used for image classification and recognition. The CIFAR-100 dataset consists of 60000 32x32 colour images in 100 classes, with 600 images per class. There are 50000 training images and 10000 test images. 
+
 ## Installation
 
 To install the environment with the required dependencies, run:
@@ -53,3 +54,11 @@ To access the results as showed in the Demo presentation of this system, one mus
 ## Additional Dataset
 The code can easily be updated to accomodate other datsets, keeping in mind adding a dataset cannot visualised in real time as the gathering of embeddings and the training of the models will take a prolonged period of time.
 
+## Usage
+### CNN
+```bash
+python cnn/extract_embeddings_cnn.py
+python cnn/train_inversion_models_cnn.py
+```
+### Initial Data
+### Running the Demo
