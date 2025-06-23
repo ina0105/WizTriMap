@@ -2,7 +2,7 @@ import os
 import argparse
 import numpy as np
 from pathlib import Path
-from utils import load_dataset, project
+from .utils.utils import load_dataset, project
 
 # -----------------------------
 # Argument parser

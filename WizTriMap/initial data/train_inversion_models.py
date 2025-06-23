@@ -14,8 +14,8 @@ from torchvision.datasets import MNIST, FashionMNIST, CIFAR100
 from torchvision import transforms
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
-from models import ConvDecoderGrayV2, ConvDecoderV2, combined_ssim_mse_loss
-from utils import load_dataset, save_image, project
+from .utils.models import ConvDecoderGrayV2, ConvDecoderV2, combined_ssim_mse_loss
+from .utils.utils import load_dataset, save_image, project
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F

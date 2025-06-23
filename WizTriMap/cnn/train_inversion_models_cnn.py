@@ -19,7 +19,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, TensorDataset
 import time
-from models import ConvDecoderV2, ConvDecoderGrayV2, InversionMLP, InversionMLP_RGB, combined_ssim_mse_loss
+from .utils.models import ConvDecoderV2, ConvDecoderGrayV2, InversionMLP, InversionMLP_RGB, combined_ssim_mse_loss
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # === Config ===

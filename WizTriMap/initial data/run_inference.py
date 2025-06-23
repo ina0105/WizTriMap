@@ -5,8 +5,8 @@ import numpy as np
 import random
 from torchvision.datasets import MNIST, FashionMNIST, CIFAR100
 from torchvision import transforms
-from models import ConvDecoderGrayV2, ConvDecoderV2
-from utils import load_dataset, save_image, project, get_class_names
+from .utils.models import ConvDecoderGrayV2, ConvDecoderV2
+from .utils.utils import load_dataset, save_image, project, get_class_names
 import torch.nn.functional as F
 from tqdm import tqdm
 
