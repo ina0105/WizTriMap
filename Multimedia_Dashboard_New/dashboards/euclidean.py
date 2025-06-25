@@ -36,7 +36,7 @@ def create_euclidean_dashboard(dataset):
                 html.Div("T-SNE", className='panel-label'), 
                 scatterplot_t_sne],
                 className='main-col-left border-widget', style={'width': '42%'}),
-            dbc.Col([html.Div("Reconstruced Image", className='panel-label'), 
+            dbc.Col([html.Div("Reconstructed Image", className='panel-label'), 
                      recon_image_widget], 
                     className='main-col-mid border-widget', style={'width': '16%'}),
             dbc.Col([html.Div("PCA", className='panel-label'), 
