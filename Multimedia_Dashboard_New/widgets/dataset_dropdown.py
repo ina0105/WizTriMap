@@ -10,8 +10,7 @@ def create_dataset_dropdown():
                        {'label': 'FashionMNIST', 'value': 'FashionMNIST'},
                        {'label': 'CIFAR-100', 'value': 'CIFAR-100'}
                    ],
-                   value='MNIST',
-                   style={'width': '200px'}
+                   value='MNIST'
                ),
-               style={'marginLeft': '770.5px', 'position': 'relative', 'zindex': 1}
+               id='right-dropdown-div'
            )

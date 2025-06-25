@@ -1,9 +1,11 @@
-import random
+import json
 import numpy as np
 import torch
 from torchvision.datasets import MNIST, FashionMNIST, CIFAR100
 from torchvision import transforms
 from torch.utils.data import Subset
+
+from helpers.utils import get_label_color_scheme
 
 
 class MNIST_Dataset:
@@ -18,6 +20,7 @@ class MNIST_Dataset:
     current_subset = None
     current_subset_numpy = None
     current_labels = None
+    current_label_colors = None
 
     @staticmethod
     def load_data(downloaded_data):
@@ -33,7 +36,7 @@ class MNIST_Dataset:
 
     @staticmethod
     def get_data_subset(downloaded_data, sample_size=5000):
-        sample_indices = random.sample(range(len(downloaded_data)), sample_size)
+        sample_indices = list(range(sample_size))  # random.sample(range(len(downloaded_data)), sample_size)
         MNIST_Dataset.original_subset_indices = sample_indices
         MNIST_Dataset.current_subset_indices = np.array(list(range(sample_size)))
         subset = Subset(downloaded_data, sample_indices)
@@ -47,6 +50,7 @@ class MNIST_Dataset:
     def load_current_subset(data_subset_numpy, data_subset_labels):
         MNIST_Dataset.current_subset_numpy = data_subset_numpy
         MNIST_Dataset.current_labels = data_subset_labels
+        MNIST_Dataset.current_label_colors = get_label_color_scheme(MNIST_Dataset.current_labels)
 
     @staticmethod
     def get(key='class_ids'):
@@ -72,6 +76,8 @@ class MNIST_Dataset:
             return MNIST_Dataset.current_subset_numpy
         elif key == 'current_labels':
             return MNIST_Dataset.current_labels
+        elif key == 'current_label_colors':
+            return MNIST_Dataset.current_label_colors
         else:
             raise ValueError('Invalid key passed to Dataset class get function')
 
@@ -94,6 +100,7 @@ class Fashion_MNIST_Dataset:
     current_subset = None
     current_subset_numpy = None
     current_labels = None
+    current_label_colors = None
 
     @staticmethod
     def load_data(downloaded_data):
@@ -109,7 +116,7 @@ class Fashion_MNIST_Dataset:
 
     @staticmethod
     def get_data_subset(downloaded_data, sample_size=5000):
-        sample_indices = random.sample(range(len(downloaded_data)), sample_size)
+        sample_indices = list(range(sample_size))  # random.sample(range(len(downloaded_data)), sample_size)
         Fashion_MNIST_Dataset.original_subset_indices = sample_indices
         Fashion_MNIST_Dataset.current_subset_indices = np.array(list(range(sample_size)))
         subset = Subset(downloaded_data, sample_indices)
@@ -123,6 +130,7 @@ class Fashion_MNIST_Dataset:
     def load_current_subset(data_subset_numpy, data_subset_labels):
         Fashion_MNIST_Dataset.current_subset_numpy = data_subset_numpy
         Fashion_MNIST_Dataset.current_labels = data_subset_labels
+        Fashion_MNIST_Dataset.current_label_colors = get_label_color_scheme(Fashion_MNIST_Dataset.current_labels)
 
     @staticmethod
     def get(key='class_ids'):
@@ -148,6 +156,8 @@ class Fashion_MNIST_Dataset:
             return Fashion_MNIST_Dataset.current_subset_numpy
         elif key == 'current_labels':
             return Fashion_MNIST_Dataset.current_labels
+        elif key == 'current_label_colors':
+            return Fashion_MNIST_Dataset.current_label_colors
         else:
             raise ValueError('Invalid key passed to Dataset class get function')
 
@@ -170,6 +180,10 @@ class CIFAR_100_Dataset:
     current_subset = None
     current_subset_numpy = None
     current_labels = None
+    current_label_colors = None
+
+    with open('helpers/fine_to_coarse.json', 'r') as file:
+        fine_to_coarse_labels = json.load(file)
 
     @staticmethod
     def load_data(downloaded_data):
@@ -179,26 +193,29 @@ class CIFAR_100_Dataset:
         CIFAR_100_Dataset.data_numpy = data_images_flat
         CIFAR_100_Dataset.data_indices = np.array(list(range(len(downloaded_data))))
         CIFAR_100_Dataset.classes = list(downloaded_data.classes)
-        data_labels = [CIFAR_100_Dataset.classes[downloaded_data[i][1]] for i in range(len(downloaded_data))]
+        data_labels = [CIFAR_100_Dataset.fine_to_coarse_labels[CIFAR_100_Dataset.classes[downloaded_data[i][1]]]
+                       for i in range(len(downloaded_data))]
         CIFAR_100_Dataset.data_labels = data_labels
         CIFAR_100_Dataset.class_ids = list(range(len(CIFAR_100_Dataset.classes)))
 
     @staticmethod
     def get_data_subset(downloaded_data, sample_size=5000):
-        sample_indices = random.sample(range(len(downloaded_data)), sample_size)
+        sample_indices = list(range(sample_size))  # random.sample(range(len(downloaded_data)), sample_size)
         CIFAR_100_Dataset.original_subset_indices = sample_indices
         CIFAR_100_Dataset.current_subset_indices = np.array(list(range(sample_size)))
         subset = Subset(downloaded_data, sample_indices)
         CIFAR_100_Dataset.current_subset = subset
         x = torch.stack([img[0].squeeze() for img in subset])
         x_flat = x.view(x.size(0), -1).numpy()
-        labels = [CIFAR_100_Dataset.classes[downloaded_data[i][1]] for i in sample_indices]
+        labels = [CIFAR_100_Dataset.fine_to_coarse_labels[CIFAR_100_Dataset.classes[downloaded_data[i][1]]]
+                  for i in sample_indices]
         return x_flat, labels
 
     @staticmethod
     def load_current_subset(data_subset_numpy, data_subset_labels):
         CIFAR_100_Dataset.current_subset_numpy = data_subset_numpy
         CIFAR_100_Dataset.current_labels = data_subset_labels
+        CIFAR_100_Dataset.current_label_colors = get_label_color_scheme(CIFAR_100_Dataset.current_labels)
 
     @staticmethod
     def get(key='class_ids'):
@@ -224,6 +241,8 @@ class CIFAR_100_Dataset:
             return CIFAR_100_Dataset.current_subset_numpy
         elif key == 'current_labels':
             return CIFAR_100_Dataset.current_labels
+        elif key == 'current_label_colors':
+            return CIFAR_100_Dataset.current_label_colors
         else:
             raise ValueError('Invalid key passed to Dataset class get function')
 

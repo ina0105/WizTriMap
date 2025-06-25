@@ -17,8 +17,7 @@ def create_model_prog_dashboard(dataset):
                 dbc.Row([
                     dbc.Col([
                         html.Div("TriMap", className='panel-label'),
-                        dcc.Loading(id='loading-original-image-euclidean', children=[
-                            scatterplot_trimap], type='circle')
+                        scatterplot_trimap
                     ],
                         className='model-prog-top-row-col-left border-widget', style={'width': '84%'}),
                     dbc.Col([

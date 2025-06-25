@@ -16,7 +16,6 @@ app.clientside_callback(
 app.clientside_callback(
     """
     function(n_clicks) {
-        console.log("Here");
         const graphContainerId = '{"dashboard":"euclidean","dataset":"MNIST","projection":"TriMap","type":"scatterplot"}'
         const graphContainer = document.getElementById(graphContainerId);
         const graph = graphContainer.querySelector('.js-plotly-plot');
@@ -43,7 +42,6 @@ app.clientside_callback(
 app.clientside_callback(
     """
     function(n_clicks) {
-        console.log("Here");
         const graphContainerId = '{"dashboard":"euclidean","dataset":"FashionMNIST","projection":"TriMap","type":"scatterplot"}'
         const graphContainer = document.getElementById(graphContainerId);
         const graph = graphContainer.querySelector('.js-plotly-plot');
@@ -70,7 +68,6 @@ app.clientside_callback(
 app.clientside_callback(
     """
     function(n_clicks) {
-        console.log("Here");
         const graphContainerId = '{"dashboard":"euclidean","dataset":"CIFAR-100","projection":"TriMap","type":"scatterplot"}'
         const graphContainer = document.getElementById(graphContainerId);
         const graph = graphContainer.querySelector('.js-plotly-plot');
@@ -123,7 +120,6 @@ app.clientside_callback(
 app.clientside_callback(
     """
     function(n_clicks) {
-        console.log("Here");
         const graphContainerId = '{"dashboard":"euclidean","dataset":"FashionMNIST","projection":"UMAP","type":"scatterplot"}'
         const graphContainer = document.getElementById(graphContainerId);
         const graph = graphContainer.querySelector('.js-plotly-plot');
@@ -150,7 +146,6 @@ app.clientside_callback(
 app.clientside_callback(
     """
     function(n_clicks) {
-        console.log("Here");
         const graphContainerId = '{"dashboard":"euclidean","dataset":"CIFAR-100","projection":"UMAP","type":"scatterplot"}'
         const graphContainer = document.getElementById(graphContainerId);
         const graph = graphContainer.querySelector('.js-plotly-plot');
@@ -203,7 +198,6 @@ app.clientside_callback(
 app.clientside_callback(
     """
     function(n_clicks) {
-        console.log("Here");
         const graphContainerId = '{"dashboard":"euclidean","dataset":"FashionMNIST","projection":"t_SNE","type":"scatterplot"}'
         const graphContainer = document.getElementById(graphContainerId);
         const graph = graphContainer.querySelector('.js-plotly-plot');
@@ -230,7 +224,6 @@ app.clientside_callback(
 app.clientside_callback(
     """
     function(n_clicks) {
-        console.log("Here");
         const graphContainerId = '{"dashboard":"euclidean","dataset":"CIFAR-100","projection":"t_SNE","type":"scatterplot"}'
         const graphContainer = document.getElementById(graphContainerId);
         const graph = graphContainer.querySelector('.js-plotly-plot');
@@ -283,7 +276,6 @@ app.clientside_callback(
 app.clientside_callback(
     """
     function(n_clicks) {
-        console.log("Here");
         const graphContainerId = '{"dashboard":"euclidean","dataset":"FashionMNIST","projection":"PCA","type":"scatterplot"}'
         const graphContainer = document.getElementById(graphContainerId);
         const graph = graphContainer.querySelector('.js-plotly-plot');
@@ -310,7 +302,6 @@ app.clientside_callback(
 app.clientside_callback(
     """
     function(n_clicks) {
-        console.log("Here");
         const graphContainerId = '{"dashboard":"euclidean","dataset":"CIFAR-100","projection":"PCA","type":"scatterplot"}'
         const graphContainer = document.getElementById(graphContainerId);
         const graph = graphContainer.querySelector('.js-plotly-plot');
@@ -338,7 +329,6 @@ app.clientside_callback(
 app.clientside_callback(
     """
     function(n_clicks) {
-        console.log("Here");
         const graphContainerId = "model-prog-plot"
         const graphContainer = document.getElementById(graphContainerId);
         const graph = graphContainer.querySelector('.js-plotly-plot');

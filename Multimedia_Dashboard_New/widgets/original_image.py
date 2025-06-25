@@ -8,7 +8,7 @@ from helpers.config import dataset_class_mapping, euclidean_image_resize_value, 
     multi_recon_original_image_resize_value, model_prog_image_resize_value
 
 
-def display_euclidena_original_image(click_data, dataset, scatterplot_fig):
+def display_euclidean_original_image(click_data, dataset, scatterplot_fig):
     dataset_class = getattr(datasets, dataset_class_mapping[dataset])
     point = click_data['points'][0]
     x_val = point['x']
@@ -98,7 +98,7 @@ def display_cnn_layer_emb_original_image(click_data, dataset, scatterplot_fig):
     if original_image_id == -1:
         print('x, y not matched')
 
-    original_image_from_id = dataset_class.get(key='data')[original_image_id][0]
+    original_image_from_id = dataset_class.get(key='current_subset')[original_image_id][0]
     original_image_array = original_image_from_id.numpy()
     if dataset == 'CIFAR-100':
         original_image_array = np.transpose(original_image_array, (1, 2, 0))

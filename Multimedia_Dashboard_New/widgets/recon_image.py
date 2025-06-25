@@ -20,6 +20,7 @@ def display_euclidean_recon_image(click_data, dataset, method):
         y_val = click_data['y']
 
     model, _ = Cache.get_model_cache(dataset, method)
+    model.eval()
     with torch.no_grad():
         out = model(torch.tensor([[x_val, y_val]], dtype=torch.float32).to(
             torch.device('cuda' if torch.cuda.is_available() else 'cpu'))).cpu().numpy()
@@ -57,6 +58,7 @@ def display_multi_recon_recon_image(click_data, dataset, method):
     for method_input_dim in dim_keys[method]:
         embeddings = TriMapInversionCache.get_embedding_cache(dataset, str(method_input_dim))
         model, _ = TriMapInversionCache.get_model_cache(dataset, str(method_input_dim))
+        model.eval()
         with torch.no_grad():
             out = model(torch.tensor(embeddings[datapoint_actual_index].reshape(1, -1), dtype=torch.float32).to(
                 torch.device('cuda' if torch.cuda.is_available() else 'cpu'))).cpu().numpy()
@@ -86,6 +88,7 @@ def display_cnn_layer_emb_recon_image(click_data, dataset, layer_number):
         y_val = click_data['y']
 
     model, _ = CNNLayerInversionCache.get_model_cache(dataset, str(layer_number))
+    model.eval()
     with torch.no_grad():
         out = model(torch.tensor([[x_val, y_val]], dtype=torch.float32).to(
             torch.device('cuda' if torch.cuda.is_available() else 'cpu'))).cpu().numpy()

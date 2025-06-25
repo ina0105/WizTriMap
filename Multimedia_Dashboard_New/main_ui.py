@@ -11,7 +11,7 @@ import torch
 import warnings
 
 from app import app
-from widgets import header_tabs, dataset_dropdown, data_stores_and_triggers
+from widgets import header_tabs, logo_widget, dataset_dropdown, data_stores_and_triggers
 import callbacks.clientside_callbacks
 import callbacks.header_tabs
 import callbacks.dataset_dropdown
@@ -20,7 +20,7 @@ import callbacks.dr_scatterplot
 from helpers.models import ConvDecoderGray, ConvDecoder, get_inversion_from_model
 from helpers import datasets
 from helpers.cache import Cache, TriMapInversionCache, CNNLayerInversionCache
-from helpers.config import dataset_list, method_list, dim_keys, cnn_layers, dataset_class_mapping
+from helpers.config import dataset_list, method_list, dim_keys, cnn_layers, dataset_class_mapping, cache_file_paths
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -39,6 +39,7 @@ projection_method_fit_transform_dict = {
 
 def preload_all(device, sample_size):
     for dataset in dataset_list:
+        print(f'Loading Dataset: {dataset}')
         dataset_class = getattr(datasets, dataset_class_mapping[dataset])
         dataset_folder_name = 'cifar-100-python' if dataset == 'CIFAR-100' else dataset
         if not os.path.isdir(f'data/{dataset_folder_name}'):
@@ -50,21 +51,35 @@ def preload_all(device, sample_size):
         dataset_class.load_data(downloaded_data)
         x_flat, labels = dataset_class.get_data_subset(downloaded_data, sample_size=sample_size)
         dataset_class.load_current_subset(x_flat, labels)
+        print(f'Dataset {dataset} loaded successfully')
 
-        if not os.path.isdir(f'pre_loaded_embeddings/{dataset_folder_name}'):
-            os.makedirs(f'pre_loaded_embeddings/{dataset_folder_name}')
-            load_prefetched = False
-        else:
-            load_prefetched = True
+    cache_exists = True
+    for cache_file_path in cache_file_paths:
+        if not os.path.exists(cache_file_path):
+            cache_exists = False
+            break
 
-        for method in method_list:
-            if not load_prefetched:
+    if not cache_exists:
+        print('Saved Cache not found. Calculating required data.')
+        for dataset in dataset_list:
+            print(f'Starting Calculation for Dataset: {dataset}')
+            dataset_class = getattr(datasets, dataset_class_mapping[dataset])
+            dataset_folder_name = 'cifar-100-python' if dataset == 'CIFAR-100' else dataset
+            if not os.path.isdir(f'pre_loaded_embeddings/{dataset_folder_name}'):
+                os.makedirs(f'pre_loaded_embeddings/{dataset_folder_name}')
+
+            x_flat = dataset_class.get(key='current_subset_numpy')
+            for method in method_list:
+                print(f'Resolving Method: {method}')
                 embedding_results = []
                 inversion_results = []
                 for model_input_dim in dim_keys[method]:
-                    x_embedding = projection_method_fit_transform_dict[method](x_flat, model_input_dim)
-                    with open(f'pre_loaded_embeddings/{dataset_folder_name}/{method}_{model_input_dim}_embeddings', 'wb') as file:
-                        pickle.dump(x_embedding, file)
+                    if os.path.exists(f'pre_loaded_embeddings/{dataset_folder_name}/{method}_{model_input_dim}_embeddings.npy'):
+                        x_embedding = np.load(f'pre_loaded_embeddings/{dataset_folder_name}/{method}_{model_input_dim}_embeddings.npy')
+                    else:
+                        x_embedding = projection_method_fit_transform_dict[method](x_flat, model_input_dim)
+                        np.save(f'pre_loaded_embeddings/{dataset_folder_name}/{method}_{model_input_dim}_embeddings.npy',
+                                x_embedding)
                     embedding_results.append(x_embedding)
                     try:
                         if dataset == 'CIFAR-100':
@@ -80,79 +95,122 @@ def preload_all(device, sample_size):
                     inversion_model.load_state_dict(torch.load(
                         f'multi_dimension_inversion_models/{formatted_dataset_name}_{method}_{model_input_dim}D.pth'))
                     inversion_model.to(device)
-                    x_inversion = get_inversion_from_model(inversion_model, x_embedding, sample_size, device)
-                    with open(f'pre_loaded_embeddings/{dataset_folder_name}/{method}_{model_input_dim}_inversion', 'wb') as file:
-                        pickle.dump(x_inversion, file)
-                    inversion_results.append(x_inversion)
-            else:
-                embedding_results = []
-                inversion_results = []
-                for model_input_dim in dim_keys[method]:
-                    with open(f'pre_loaded_embeddings/{dataset_folder_name}/{method}_{model_input_dim}_embeddings', 'rb') as file:
-                        x_embedding = pickle.load(file)
+                    if os.path.exists(
+                            f'pre_loaded_embeddings/{dataset_folder_name}/{method}_{model_input_dim}_recon_result.npy'):
+                        x_recon = np.load(f'pre_loaded_embeddings/{dataset_folder_name}/{method}_{model_input_dim}_recon_result.npy')
+                    else:
+                        x_recon = get_inversion_from_model(inversion_model, x_embedding, sample_size, device)
+                        np.save(
+                            f'pre_loaded_embeddings/{dataset_folder_name}/{method}_{model_input_dim}_recon_result.npy',
+                            x_recon)
+                    inversion_results.append((inversion_model, x_recon))
 
-                    with open(f'pre_loaded_embeddings/{dataset_folder_name}/{method}_{model_input_dim}_inversion', 'rb') as file:
-                        x_inversion = pickle.load(file)
+                Cache.load_embedding_cache(dataset, method, embedding_results[0])
+                Cache.load_last_embeddings(dataset, method, Cache.get_embedding_cache(dataset, method))
+                model, x_recon = inversion_results[0]
+                Cache.load_model_cache(dataset, method, (model, x_recon))
 
-                    embedding_results.append(x_embedding)
-                    inversion_results.append(x_inversion)
+                if method == 'TriMap':
+                    for input_dim_index, model_input_dim in enumerate(dim_keys[method]):
+                        TriMapInversionCache.load_embedding_cache(dataset, str(model_input_dim),
+                                                                  embedding_results[input_dim_index])
+                        TriMapInversionCache.load_model_cache(dataset, str(model_input_dim),
+                                                              inversion_results[input_dim_index])
+                        try:
+                            if dataset == 'CIFAR-100':
+                                cnn_layer_inversion_model = ConvDecoder(input_dim=2)
+                                formatted_dataset_name = dataset.replace('-', '_')
+                            else:
+                                cnn_layer_inversion_model = ConvDecoderGray(input_dim=2)
+                                formatted_dataset_name = dataset
+                        except Exception as exception:
+                            print('Train the Inversion models for CNN Layers or copy and paste the '
+                                  'cnn_layer_embeddings_trimap folder from <URL> in the working directory / main folder')
+                            raise exception
 
-            Cache.load_embedding_cache(dataset, method, embedding_results[0])
-            Cache.load_last_embeddings(dataset, method, Cache.get_embedding_cache(dataset, method))
-            model, x_recon = inversion_results[0]
-            Cache.load_model_cache(dataset, method, (model, x_recon))
+                        for layer_number in cnn_layers:
+                            layer_embeddings = torch.load(
+                                f'cnn_layer_embeddings_trimap/{formatted_dataset_name}_{method}_layer{layer_number}_embeddings.pt',
+                                weights_only=False)
+                            layer_embeddings = np.array(
+                                [layer_embeddings[i, :] for i in dataset_class.get(key='original_subset_indices')])
+                            CNNLayerInversionCache.load_embedding_cache(dataset, str(layer_number), layer_embeddings)
 
-            if method == 'TriMap':
-                for input_dim_index, model_input_dim in enumerate(dim_keys[method]):
-                    TriMapInversionCache.load_embedding_cache(dataset, str(model_input_dim),
-                                                              embedding_results[input_dim_index])
-                    TriMapInversionCache.load_model_cache(dataset, str(model_input_dim),
-                                                          inversion_results[input_dim_index])
-
-                    try:
-                        if dataset == 'CIFAR-100':
-                            cnn_layer_inversion_model = ConvDecoder(input_dim=2)
-                            formatted_dataset_name = dataset.replace('-', '_')
-                        else:
-                            cnn_layer_inversion_model = ConvDecoderGray(input_dim=2)
-                            formatted_dataset_name = dataset
-                    except Exception as exception:
-                        print('Train the Inversion models for CNN Layers or copy and paste the '
-                              'cnn_layer_embeddings_trimap folder from <URL> in the working directory / main folder')
-                        raise exception
-
-                    for layer_number in cnn_layers:
-                        layer_embeddings = torch.load(f'cnn_layer_embeddings_trimap/{formatted_dataset_name}_{method}_layer{layer_number}_embeddings.pt')
-                        CNNLayerInversionCache.load_embedding_cache(dataset, str(layer_number), layer_embeddings)
-
-                        if not load_prefetched:
                             cnn_layer_inversion_model.load_state_dict(torch.load(
                                 f'cnn_layer_inversion_models/{formatted_dataset_name}_{method}_layer{layer_number}.pth',
                                 weights_only=False))
                             cnn_layer_inversion_model.to(device)
-                            x_inversion = get_inversion_from_model(cnn_layer_inversion_model, layer_embeddings,
-                                                                   layer_embeddings.shape[0], device)
-                            with open(
-                                    f'pre_loaded_embeddings/{dataset_folder_name}/{method}_cnn_{layer_number}_inversion',
-                                    'wb') as file:
-                                pickle.dump(x_inversion, file)
-                        else:
-                            with open(
-                                    f'pre_loaded_embeddings/{dataset_folder_name}/{method}_cnn_{layer_number}_inversion',
-                                    'rb') as file:
-                                x_inversion = pickle.load(file)
-                        model, x_recon = x_inversion
-                        CNNLayerInversionCache.load_model_cache(dataset, str(layer_number), (model, x_recon))
+
+                            if os.path.exists(
+                                    f'pre_loaded_embeddings/{dataset_folder_name}/{method}_cnn_{layer_number}_recon_result.npy'):
+                                x_recon = np.load(
+                                    f'pre_loaded_embeddings/{dataset_folder_name}/{method}_cnn_{layer_number}_recon_result.npy')
+                            else:
+                                x_recon = get_inversion_from_model(cnn_layer_inversion_model, layer_embeddings,
+                                                                   sample_size, device)
+                                np.save(
+                                    f'pre_loaded_embeddings/{dataset_folder_name}/{method}_cnn_{layer_number}_recon_result.npy',
+                                    x_recon)
+                            CNNLayerInversionCache.load_model_cache(dataset, str(layer_number),
+                                                                    (cnn_layer_inversion_model, x_recon))
+                print(f'Method {method} done')
+            print(f'Calculation for Dataset {dataset} done')
+
+        print('Saving Cache classes')
+
+        with open('cache_folder/cache_class_embedding_cache.pickle', 'wb') as file:
+            pickle.dump(Cache.embedding_cache, file)
+
+        with open('cache_folder/cache_class_model_cache.pickle', 'wb') as file:
+            pickle.dump(Cache.model_cache, file)
+
+        with open('cache_folder/trimap_inversion_cache_class_embedding_cache.pickle', 'wb') as file:
+            pickle.dump(TriMapInversionCache.embedding_cache, file)
+
+        with open('cache_folder/trimap_inversion_cache_class_model_cache.pickle', 'wb') as file:
+            pickle.dump(TriMapInversionCache.model_cache, file)
+
+        with open('cache_folder/cnn_inversion_cache_class_embedding_cache.pickle', 'wb') as file:
+            pickle.dump(CNNLayerInversionCache.embedding_cache, file)
+
+        with open('cache_folder/cnn_inversion_cache_class_model_cache.pickle', 'wb') as file:
+            pickle.dump(CNNLayerInversionCache.model_cache, file)
+
+        print('Cache classes saved successfully')
+    else:
+        print('Found saved Cache')
+        print('Loading Cache classes')
+        with open('cache_folder/cache_class_embedding_cache.pickle', 'rb') as file:
+            Cache.embedding_cache = pickle.load(file)
+
+        with open('cache_folder/cache_class_model_cache.pickle', 'rb') as file:
+            Cache.model_cache = pickle.load(file)
+
+        with open('cache_folder/trimap_inversion_cache_class_embedding_cache.pickle', 'rb') as file:
+            TriMapInversionCache.embedding_cache = pickle.load(file)
+
+        with open('cache_folder/trimap_inversion_cache_class_model_cache.pickle', 'rb') as file:
+            TriMapInversionCache.model_cache = pickle.load(file)
+
+        with open('cache_folder/cnn_inversion_cache_class_embedding_cache.pickle', 'rb') as file:
+            CNNLayerInversionCache.embedding_cache = pickle.load(file)
+
+        with open('cache_folder/cnn_inversion_cache_class_model_cache.pickle', 'rb') as file:
+            CNNLayerInversionCache.model_cache = pickle.load(file)
+
+        print('Cache classes loaded successfully')
 
 
 def run_ui():
     header_tab_widget = header_tabs.create_header_tabs()
+    logo_image_widget = logo_widget.create_logo_image_widget()
     dataset_dropdown_widget = dataset_dropdown.create_dataset_dropdown()
     data_stores_and_triggers_area = data_stores_and_triggers.create_data_stores_and_triggers()
 
     app.layout = html.Div([
         html.Div([
             header_tab_widget,
+            logo_image_widget,
             dataset_dropdown_widget],
             id='header-bar'
         ),
@@ -163,7 +221,7 @@ def run_ui():
         dcc.Store(id='init-load', data=False)
     ])
 
-    app.run(debug=True, use_reloader=True)
+    app.run(debug=True, use_reloader=False)
 
 
 def main(args):
@@ -174,14 +232,17 @@ def main(args):
     if not os.path.isdir('pre_loaded_embeddings'):
         os.makedirs('pre_loaded_embeddings')
 
-    preload_all(device, args.sample_size)
+    if not os.path.isdir('cache_folder'):
+        os.makedirs('cache_folder')
 
-    run_ui()
+    preload_all(device, args.sample_size)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--sample_size', default=5000, type=int, help='Sample Size to consider')
+    parser.add_argument('--sample_size', default=10000, type=int, help='Sample Size to consider')
 
     parser_args = parser.parse_args()
     main(parser_args)
+
+    run_ui()

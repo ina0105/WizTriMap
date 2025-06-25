@@ -29,10 +29,7 @@ def add_images_to_scatterplot(dataset, scatterplot_fig, dashboard):
 
     if images_in_zoom:
         for x, y, image_id in images_in_zoom:
-            if dashboard == 'model_prog':
-                image_from_id = dataset_class.get(key='data')[image_id][0]
-            else:
-                image_from_id = dataset_class.get(key='current_subset')[image_id][0]
+            image_from_id = dataset_class.get(key='current_subset')[image_id][0]
             img_array = image_from_id.numpy()
             if dataset == 'CIFAR-100':
                 img_array = np.transpose(img_array, (1, 2, 0)) * 255
@@ -69,17 +66,29 @@ def create_scatterplot_figure_euclidean(dataset, projection, width, height):
     indices = dataset_class.get(key='current_subset_indices')
     labels = dataset_class.get(key='current_labels')
     xy = np.stack([embedding[:, 0], embedding[:, 1]], axis=1)
-    customdata = np.column_stack((indices, labels, xy))
+    customdata = np.column_stack((indices, labels, recon_error, xy))
+
+    color_scale = dataset_class.get(key='current_label_colors')
+    point_colors = [color_scale[label] for label in labels]
 
     fig.add_trace(go.Scattergl(
         x=embedding[:, 0], y=embedding[:, 1], mode='markers',
-        marker=dict(color=recon_error, colorscale='Inferno', size=2, colorbar=dict(title='Recon Error', thickness=10,
-                                                                                   len=0.6, x=1.02)),
+        marker=dict(color=point_colors, size=2, opacity=0.6),
         name=projection,
         showlegend=False,
         customdata=customdata,
-        hovertemplate='Latent X: %{customdata[2]:.2f}<br>Latent Y: %{customdata[3]:.2f}<br>Label: %{customdata[1]}'
+        hovertemplate='Latent X: %{customdata[3]:.2f}<br>Latent Y: %{customdata[4]:.2f}<br>Label: %{customdata[1]}<br>Recon Error: %{customdata[2]:.2f}'
     ))
+
+    fig.add_trace(go.Scatter(
+            x=[],
+            y=[],
+            mode="markers",
+            name='selected point',
+            showlegend=False,
+            marker=dict(size=15, color="red", symbol='x'),
+        ),
+    )
 
     fig.update_layout(
         margin=dict(l=5, r=2, t=10, b=2),
@@ -101,23 +110,35 @@ def create_scatterplot_figure_multi_recon(dataset, projection, width, height):
     indices = dataset_class.get(key='current_subset_indices')
     labels = dataset_class.get(key='current_labels')
     xy = np.stack([embedding[:, 0], embedding[:, 1]], axis=1)
-    customdata = np.column_stack((indices, labels, xy))
+    customdata = np.column_stack((indices, labels, recon_error, xy))
+
+    color_scale = dataset_class.get(key='current_label_colors')
+    point_colors = [color_scale[label] for label in labels]
 
     fig.add_trace(go.Scattergl(
         x=embedding[:, 0], y=embedding[:, 1], mode='markers',
-        marker=dict(color=recon_error, colorscale='Inferno', size=2, colorbar=dict(title='Recon Error', thickness=10,
-                                                                                   len=0.6, x=1.02)),
+        marker=dict(color=point_colors, size=2),
         name=projection,
         showlegend=False,
         customdata=customdata,
-        hovertemplate='Latent X: %{customdata[2]:.2f}<br>Latent Y: %{customdata[3]:.2f}<br>Label: %{customdata[1]}'
+        hovertemplate='Latent X: %{customdata[3]:.2f}<br>Latent Y: %{customdata[4]:.2f}<br>Label: %{customdata[1]}<br>Recon Error: %{customdata[2]:.2f}'
     ))
+
+    fig.add_trace(go.Scatter(
+        x=[],
+        y=[],
+        mode="markers",
+        name='selected point',
+        showlegend=False,
+        marker=dict(size=15, color="red", symbol='x'),
+    ),
+    )
 
     fig.update_layout(
         margin=dict(l=5, r=2, t=10, b=2),
         autosize=False,
         width=width,
-        height=height,
+        height=height
     )
     return fig
 
@@ -126,34 +147,46 @@ def create_scatterplot_figure_model_prog(dataset, layer_number, width, height):
     dataset_class = getattr(datasets, dataset_class_mapping[dataset])
     embedding = CNNLayerInversionCache.get_embedding_cache(dataset, str(layer_number))
     model, x_recon = CNNLayerInversionCache.get_model_cache(dataset, str(layer_number))
-    recon_error = np.mean((dataset_class.get('data_numpy') - x_recon) ** 2, axis=1)
+    recon_error = np.mean((dataset_class.get('current_subset_numpy') - x_recon) ** 2, axis=1)
 
     fig = go.Figure()
-    indices = dataset_class.get(key='data_indices')
-    labels = dataset_class.get(key='data_labels')
+    indices = dataset_class.get(key='current_subset_indices')
+    labels = dataset_class.get(key='current_labels')
     xy = np.stack([embedding[:, 0], embedding[:, 1]], axis=1)
-    customdata = np.column_stack((indices, labels, xy))
+    customdata = np.column_stack((indices, labels, recon_error, xy))
+
+    color_scale = dataset_class.get(key='current_label_colors')
+    point_colors = [color_scale[label] for label in labels]
 
     fig.add_trace(go.Scattergl(
         x=embedding[:, 0], y=embedding[:, 1], mode='markers',
-        marker=dict(color=recon_error, colorscale='Inferno', size=2, colorbar=dict(title='Recon Error', thickness=10,
-                                                                                   len=0.6, x=1.02)),
+        marker=dict(color=point_colors, size=2),
         name=f'CNN_Layer_{layer_number}',
         showlegend=False,
         customdata=customdata,
-        hovertemplate='Latent X: %{customdata[2]:.2f}<br>Latent Y: %{customdata[3]:.2f}<br>Label: %{customdata[1]}'
+        hovertemplate='Latent X: %{customdata[3]:.2f}<br>Latent Y: %{customdata[4]:.2f}<br>Label: %{customdata[1]}<br>Recon Error: %{customdata[2]:.2f}'
     ))
+
+    fig.add_trace(go.Scatter(
+        x=[],
+        y=[],
+        mode="markers",
+        name='selected point',
+        showlegend=False,
+        marker=dict(size=15, color="red", symbol='x'),
+    ),
+    )
 
     fig.update_layout(
         margin=dict(l=5, r=2, t=10, b=2),
         autosize=False,
         width=width,
-        height=height,
+        height=height
     )
     return fig
 
 
-def create_scatterplot(dataset, width, height, dashboard='euclidean', projection='TriMap', layer_number=0):
+def create_scatterplot(dataset, width, height, dashboard='euclidean', projection='TriMap', layer_number=1):
     if dashboard == 'euclidean':
         return dcc.Graph(
             figure=create_scatterplot_figure_euclidean(dataset, projection, width, height),

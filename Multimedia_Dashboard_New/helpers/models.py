@@ -80,4 +80,4 @@ def get_inversion_from_model(model, x_embedding, sample_size, device):
     with torch.no_grad():
         x_recon = model(embedding_tensor).cpu().numpy()
     x_recon = x_recon.reshape(sample_size, -1)
-    return model, x_recon
+    return x_recon
