@@ -7,20 +7,52 @@ https://github.com/user-attachments/assets/c75b4f4e-912e-48a6-a635-1e4f115c5ffa
 
 ```
 WizTriMap
-├──
+├── additional_experiments
+│    ├── hyperbolic.ipynb
+│    └── hyperbolic-corr-fashionmnist.ipynb
+├── assets
+│    ├── clientside.js
+│    └── main.css
+├── callbacks
+│    ├── clientside_callbacks.py
+│    ├── dataset_dropdown.py
+│    ├── dr_scatterplot.py
+│    └── header_tabs.py
+├── dashboards
+│    ├── euclidean.py
+│    ├── model_prog.py
+│    └── multi_recon_trimap.py
+├── helpers
+│    ├── cache.py
+│    ├── config.py
+│    ├── datasets.py
+│    └── fine_to_coarse.json
+├── logo_image
+│    ├── WizTriMap.png
+├── models
+│    ├── models.py
+├── preprocessing
+│    ├── extract_embeddings_cnn.py
+│    ├── run_inference.py
+│    ├── save_projections.py
+│    ├── train_inversion_models.py
+│    └── train_inversion_models_cnn.py
+├── trimap
+│    ├── trimap.py
 ├── utils
 │   ├── utils.py
-|   ├── save_projections.py
-│   └── models.py
-├── cnn
-│   ├── extract_embeddings_cnn.py
-│   └── train_inversion_models_cnn.py
-├── initial data
-│   ├── train_inversion_models.py
-│   └── run_inference.py
-├── additional experiments
-│   ├── hyperbolic.py
-│   └── hyperbolic-corr-fashionmnist.py
+│   └── save_projections_utils.py
+├── widgets
+│    ├── data_stores_and_triggers.py
+│    ├── dataset_dropdown.py
+│    ├── dr_scatterplot.py
+│    ├── header_tabs.py
+│    ├── logo_widget.py
+│    ├── original_image.py
+│    ├── radio_button.py
+│    └── recon_image.py
+├── app.py
+├── main_ui.py
 ├── WizTrimap_env.yml
 └── README.md
 ```
@@ -45,15 +77,25 @@ conda activate WizTrimap
 To access the results as shown in the Demo presentation of this system, one must obtain the necessary data in advance; otherwise, the execution time would pose a constraint. The pipeline to the Demo is as follows:
 #### 1. Initial Data Processing
    1.1 Load and normalize the train data for MNIST, FashionMNIST, and CIFAR-100 using torchvision \
+   <br>
    1.2 For each sample, compute latent embeddings on-the-fly (TriMap: 2D–7D, others: only 2D) \
+   <br>
    1.3 Train inversion models to reconstruct images from embeddings and save the best model per dataset-method-dim in `saved_models/` \
+   <br>
    1.4 Compute and save reconstruction errors as `.npy` files and 20 reconstructed image samples in `recon_output/<dataset>/<method>_<dim>D/`
 
 #### 2. CNN visualisation 
    2.1 Extracting embeddings from three layers of a simple CNN for every Dataset \
+   <br>
    2.2 Training inversion models to invert from those embeddings to the original image
+
 #### 3. Running the Demo
-   3.1
+   3.1 After running the above two steps to get the necessary models, the main ui is 
+   ready to run. \
+   <br>
+   3.2 On the first run, the embeddings for each DR method will be computed and saved 
+   inside a folder in the main working directory. This would ensure faster reload for 
+   subsequent runs.
 
 
 ## Additional Dataset
@@ -74,3 +116,7 @@ python initial_data/train_inversion_models.py
 python initial_data/run_inference.py
 ```
 ### Running the Demo
+Run the 'main_ui.py' for running the main dash app.
+```bash
+python main_ui.py
+```
