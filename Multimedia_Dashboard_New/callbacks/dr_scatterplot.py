@@ -41,20 +41,42 @@ def scatterplot_is_zoomed(zoom_data, scatterplot_fig):
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
     Input({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'clickData'),
     State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_mnist_trimap_scatterplot_clicked_display(click_data, scatterplot_fig):
+def euclidean_mnist_trimap_scatterplot_clicked_display(click_data, scatterplot_fig_trimap, scatterplot_fig_umap,
+                                                       scatterplot_fig_tsne, scatterplot_fig_pca):
     global euclidean_image_lock
     with euclidean_image_lock:
         reconstructed_image_object = recon_image.display_euclidean_recon_image(click_data, 'MNIST', 'TriMap')
-        original_image_object = original_image.display_euclidean_original_image(click_data, 'MNIST', scatterplot_fig)
+        original_image_object = original_image.display_euclidean_original_image(click_data, 'MNIST',
+                                                                                scatterplot_fig_trimap)
         clicked_x = click_data['points'][0]['x']
         clicked_y = click_data['points'][0]['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_trimap['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_trimap['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_trimap, scatterplot_fig_umap, \
+               scatterplot_fig_tsne, scatterplot_fig_pca
 
 
 @app.callback(
@@ -62,23 +84,47 @@ def euclidean_mnist_trimap_scatterplot_clicked_display(click_data, scatterplot_f
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'},
            'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
     Input({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'},
           'clickData'),
     State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'},
           'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'},
+          'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'},
+          'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'},
+          'figure'),
     prevent_initial_call=True
 )
-def euclidean_fashion_mnist_trimap_scatterplot_clicked_display(click_data, scatterplot_fig):
+def euclidean_fashion_mnist_trimap_scatterplot_clicked_display(click_data, scatterplot_fig_trimap, scatterplot_fig_umap,
+                                                               scatterplot_fig_tsne, scatterplot_fig_pca):
     global euclidean_image_lock
     with euclidean_image_lock:
         reconstructed_image_object = recon_image.display_euclidean_recon_image(click_data, 'FashionMNIST', 'TriMap')
         original_image_object = original_image.display_euclidean_original_image(click_data, 'FashionMNIST',
-                                                                                scatterplot_fig)
+                                                                                scatterplot_fig_trimap)
         clicked_x = click_data['points'][0]['x']
         clicked_y = click_data['points'][0]['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_trimap['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_trimap['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_trimap, scatterplot_fig_umap, \
+               scatterplot_fig_tsne, scatterplot_fig_pca
 
 
 @app.callback(
@@ -86,22 +132,43 @@ def euclidean_fashion_mnist_trimap_scatterplot_clicked_display(click_data, scatt
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'},
            'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
     Input({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'},
           'clickData'),
     State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_cifar_trimap_scatterplot_clicked_display(click_data, scatterplot_fig):
+def euclidean_cifar_trimap_scatterplot_clicked_display(click_data, scatterplot_fig_trimap, scatterplot_fig_umap,
+                                                       scatterplot_fig_tsne, scatterplot_fig_pca):
     global euclidean_image_lock
     with euclidean_image_lock:
         reconstructed_image_object = recon_image.display_euclidean_recon_image(click_data, 'CIFAR-100', 'TriMap')
         original_image_object = original_image.display_euclidean_original_image(click_data, 'CIFAR-100',
-                                                                                scatterplot_fig)
+                                                                                scatterplot_fig_trimap)
         clicked_x = click_data['points'][0]['x']
         clicked_y = click_data['points'][0]['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_trimap['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_trimap['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_trimap, scatterplot_fig_umap, \
+               scatterplot_fig_tsne, scatterplot_fig_pca
 
 
 @app.callback(
@@ -109,11 +176,22 @@ def euclidean_cifar_trimap_scatterplot_clicked_display(click_data, scatterplot_f
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
     Input('euclidean-mnist-trimap-plot-click', 'data'),
     State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_mnist_trimap_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig):
+def euclidean_mnist_trimap_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig_trimap,
+                                                                  scatterplot_fig_umap, scatterplot_fig_tsne,
+                                                                  scatterplot_fig_pca):
     global euclidean_image_lock
     dataset = json.loads(click_data['graphId'])['dataset']
     click_data = {key: value for key, value in click_data.items() if key in ['x', 'y']}
@@ -122,9 +200,20 @@ def euclidean_mnist_trimap_scatterplot_empty_area_clicked_display(click_data, sc
         original_image_object = get_blank_image_base64()
         clicked_x = click_data['x']
         clicked_y = click_data['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_trimap['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_trimap['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_trimap, scatterplot_fig_umap, \
+               scatterplot_fig_tsne, scatterplot_fig_pca
 
 
 @app.callback(
@@ -132,12 +221,26 @@ def euclidean_mnist_trimap_scatterplot_empty_area_clicked_display(click_data, sc
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'},
            'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
     Input('euclidean-fashion-mnist-trimap-plot-click', 'data'),
     State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'},
           'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'},
+          'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'},
+          'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'},
+          'figure'),
     prevent_initial_call=True
 )
-def euclidean_fashion_mnist_trimap_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig):
+def euclidean_fashion_mnist_trimap_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig_trimap,
+                                                                          scatterplot_fig_umap, scatterplot_fig_tsne,
+                                                                          scatterplot_fig_pca):
     global euclidean_image_lock
     dataset = json.loads(click_data['graphId'])['dataset']
     click_data = {key: value for key, value in click_data.items() if key in ['x', 'y']}
@@ -146,9 +249,20 @@ def euclidean_fashion_mnist_trimap_scatterplot_empty_area_clicked_display(click_
         original_image_object = get_blank_image_base64()
         clicked_x = click_data['x']
         clicked_y = click_data['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_trimap['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_trimap['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_trimap, scatterplot_fig_umap, \
+               scatterplot_fig_tsne, scatterplot_fig_pca
 
 
 @app.callback(
@@ -156,11 +270,22 @@ def euclidean_fashion_mnist_trimap_scatterplot_empty_area_clicked_display(click_
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
     Input('euclidean-cifar-trimap-plot-click', 'data'),
     State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_cifar_trimap_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig):
+def euclidean_cifar_trimap_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig_trimap,
+                                                                  scatterplot_fig_umap, scatterplot_fig_tsne,
+                                                                  scatterplot_fig_pca):
     global euclidean_image_lock
     dataset = json.loads(click_data['graphId'])['dataset']
     click_data = {key: value for key, value in click_data.items() if key in ['x', 'y']}
@@ -169,9 +294,20 @@ def euclidean_cifar_trimap_scatterplot_empty_area_clicked_display(click_data, sc
         original_image_object = get_blank_image_base64()
         clicked_x = click_data['x']
         clicked_y = click_data['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_trimap['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_trimap['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_trimap, scatterplot_fig_umap, \
+               scatterplot_fig_tsne, scatterplot_fig_pca
 
 
 @app.callback(
@@ -179,44 +315,90 @@ def euclidean_cifar_trimap_scatterplot_empty_area_clicked_display(click_data, sc
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
     Input({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'clickData'),
     State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_mnist_umap_scatterplot_clicked_display(click_data, scatterplot_fig):
+def euclidean_mnist_umap_scatterplot_clicked_display(click_data, scatterplot_fig_umap, scatterplot_fig_trimap,
+                                                     scatterplot_fig_tsne, scatterplot_fig_pca):
     global euclidean_image_lock
     with euclidean_image_lock:
         reconstructed_image_object = recon_image.display_euclidean_recon_image(click_data, 'MNIST', 'UMAP')
-        original_image_object = original_image.display_euclidean_original_image(click_data, 'MNIST', scatterplot_fig)
+        original_image_object = original_image.display_euclidean_original_image(click_data, 'MNIST',
+                                                                                scatterplot_fig_umap)
         clicked_x = click_data['points'][0]['x']
         clicked_y = click_data['points'][0]['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_umap['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_umap['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_umap, scatterplot_fig_trimap, \
+               scatterplot_fig_tsne, scatterplot_fig_pca
 
 
 @app.callback(
     Output('recon-image-euclidean', 'src', allow_duplicate=True),
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'},
            'figure', allow_duplicate=True),
     Input({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'},
           'clickData'),
     State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'},
           'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'},
+          'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'},
+          'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'},
+          'figure'),
     prevent_initial_call=True
 )
-def euclidean_fashion_mnist_umap_scatterplot_clicked_display(click_data, scatterplot_fig):
+def euclidean_fashion_mnist_umap_scatterplot_clicked_display(click_data, scatterplot_fig_umap, scatterplot_fig_trimap,
+                                                             scatterplot_fig_tsne, scatterplot_fig_pca):
     global euclidean_image_lock
     with euclidean_image_lock:
         reconstructed_image_object = recon_image.display_euclidean_recon_image(click_data, 'FashionMNIST', 'UMAP')
         original_image_object = original_image.display_euclidean_original_image(click_data, 'FashionMNIST',
-                                                                                scatterplot_fig)
+                                                                                scatterplot_fig_umap)
         clicked_x = click_data['points'][0]['x']
         clicked_y = click_data['points'][0]['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_umap['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_umap['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_umap, scatterplot_fig_trimap, \
+               scatterplot_fig_tsne, scatterplot_fig_pca
 
 
 @app.callback(
@@ -224,22 +406,43 @@ def euclidean_fashion_mnist_umap_scatterplot_clicked_display(click_data, scatter
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
     Input({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'},
           'clickData'),
     State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_cifar_umap_scatterplot_clicked_display(click_data, scatterplot_fig):
+def euclidean_cifar_umap_scatterplot_clicked_display(click_data, scatterplot_fig_umap, scatterplot_fig_trimap,
+                                                     scatterplot_fig_tsne, scatterplot_fig_pca):
     global euclidean_image_lock
     with euclidean_image_lock:
         reconstructed_image_object = recon_image.display_euclidean_recon_image(click_data, 'CIFAR-100', 'UMAP')
         original_image_object = original_image.display_euclidean_original_image(click_data, 'CIFAR-100',
-                                                                                scatterplot_fig)
+                                                                                scatterplot_fig_umap)
         clicked_x = click_data['points'][0]['x']
         clicked_y = click_data['points'][0]['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_umap['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_umap['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_umap, scatterplot_fig_trimap, \
+               scatterplot_fig_tsne, scatterplot_fig_pca
 
 
 @app.callback(
@@ -247,11 +450,21 @@ def euclidean_cifar_umap_scatterplot_clicked_display(click_data, scatterplot_fig
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
     Input('euclidean-mnist-umap-plot-click', 'data'),
     State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_mnist_umap_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig):
+def euclidean_mnist_umap_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig_umap, scatterplot_fig_trimap,
+                                                                scatterplot_fig_tsne, scatterplot_fig_pca):
     global euclidean_image_lock
     dataset = json.loads(click_data['graphId'])['dataset']
     click_data = {key: value for key, value in click_data.items() if key in ['x', 'y']}
@@ -260,9 +473,20 @@ def euclidean_mnist_umap_scatterplot_empty_area_clicked_display(click_data, scat
         original_image_object = get_blank_image_base64()
         clicked_x = click_data['x']
         clicked_y = click_data['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_umap['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_umap['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_umap, scatterplot_fig_trimap, \
+               scatterplot_fig_tsne, scatterplot_fig_pca
 
 
 @app.callback(
@@ -270,11 +494,22 @@ def euclidean_mnist_umap_scatterplot_empty_area_clicked_display(click_data, scat
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'},
            'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
     Input('euclidean-fashion-mnist-umap-plot-click', 'data'),
     State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_fashion_mnist_umap_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig):
+def euclidean_fashion_mnist_umap_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig_umap,
+                                                                        scatterplot_fig_trimap, scatterplot_fig_tsne,
+                                                                        scatterplot_fig_pca):
     global euclidean_image_lock
     dataset = json.loads(click_data['graphId'])['dataset']
     click_data = {key: value for key, value in click_data.items() if key in ['x', 'y']}
@@ -283,9 +518,20 @@ def euclidean_fashion_mnist_umap_scatterplot_empty_area_clicked_display(click_da
         original_image_object = get_blank_image_base64()
         clicked_x = click_data['x']
         clicked_y = click_data['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_umap['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_umap['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_umap, scatterplot_fig_trimap, \
+               scatterplot_fig_tsne, scatterplot_fig_pca
 
 
 @app.callback(
@@ -293,11 +539,22 @@ def euclidean_fashion_mnist_umap_scatterplot_empty_area_clicked_display(click_da
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
     Input('euclidean-cifar-umap-plot-click', 'data'),
     State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_cifar_umap_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig):
+def euclidean_cifar_umap_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig_umap,
+                                                                scatterplot_fig_trimap, scatterplot_fig_tsne,
+                                                                scatterplot_fig_pca):
     global euclidean_image_lock
     dataset = json.loads(click_data['graphId'])['dataset']
     click_data = {key: value for key, value in click_data.items() if key in ['x', 'y']}
@@ -306,9 +563,20 @@ def euclidean_cifar_umap_scatterplot_empty_area_clicked_display(click_data, scat
         original_image_object = get_blank_image_base64()
         clicked_x = click_data['x']
         clicked_y = click_data['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_umap['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_umap['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_umap, scatterplot_fig_trimap, \
+               scatterplot_fig_tsne, scatterplot_fig_pca
 
 
 @app.callback(
@@ -316,44 +584,90 @@ def euclidean_cifar_umap_scatterplot_empty_area_clicked_display(click_data, scat
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
     Input({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'clickData'),
     State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_mnist_tsne_scatterplot_clicked_display(click_data, scatterplot_fig):
+def euclidean_mnist_tsne_scatterplot_clicked_display(click_data, scatterplot_fig_tsne, scatterplot_fig_trimap,
+                                                     scatterplot_fig_umap, scatterplot_fig_pca):
     global euclidean_image_lock
     with euclidean_image_lock:
         reconstructed_image_object = recon_image.display_euclidean_recon_image(click_data, 'MNIST', 't_SNE')
-        original_image_object = original_image.display_euclidean_original_image(click_data, 'MNIST', scatterplot_fig)
+        original_image_object = original_image.display_euclidean_original_image(click_data, 'MNIST',
+                                                                                scatterplot_fig_tsne)
         clicked_x = click_data['points'][0]['x']
         clicked_y = click_data['points'][0]['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_tsne['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_tsne['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_tsne, scatterplot_fig_trimap, \
+               scatterplot_fig_umap, scatterplot_fig_pca
 
 
 @app.callback(
     Output('recon-image-euclidean', 'src', allow_duplicate=True),
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'},
            'figure', allow_duplicate=True),
     Input({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'},
           'clickData'),
     State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'},
           'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'},
+          'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'},
+          'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'},
+          'figure'),
     prevent_initial_call=True
 )
-def euclidean_fashion_mnist_tsne_scatterplot_clicked_display(click_data, scatterplot_fig):
+def euclidean_fashion_mnist_tsne_scatterplot_clicked_display(click_data, scatterplot_fig_tsne, scatterplot_fig_trimap,
+                                                             scatterplot_fig_umap, scatterplot_fig_pca):
     global euclidean_image_lock
     with euclidean_image_lock:
         reconstructed_image_object = recon_image.display_euclidean_recon_image(click_data, 'FashionMNIST', 't_SNE')
         original_image_object = original_image.display_euclidean_original_image(click_data, 'FashionMNIST',
-                                                                                scatterplot_fig)
+                                                                                scatterplot_fig_tsne)
         clicked_x = click_data['points'][0]['x']
         clicked_y = click_data['points'][0]['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_tsne['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_tsne['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_tsne, scatterplot_fig_trimap, \
+               scatterplot_fig_umap, scatterplot_fig_pca
 
 
 @app.callback(
@@ -361,22 +675,43 @@ def euclidean_fashion_mnist_tsne_scatterplot_clicked_display(click_data, scatter
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
     Input({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'},
           'clickData'),
     State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_cifar_tsne_scatterplot_clicked_display(click_data, scatterplot_fig):
+def euclidean_cifar_tsne_scatterplot_clicked_display(click_data, scatterplot_fig_tsne, scatterplot_fig_trimap,
+                                                     scatterplot_fig_umap, scatterplot_fig_pca):
     global euclidean_image_lock
     with euclidean_image_lock:
         reconstructed_image_object = recon_image.display_euclidean_recon_image(click_data, 'CIFAR-100', 't_SNE')
         original_image_object = original_image.display_euclidean_original_image(click_data, 'CIFAR-100',
-                                                                                scatterplot_fig)
+                                                                                scatterplot_fig_tsne)
         clicked_x = click_data['points'][0]['x']
         clicked_y = click_data['points'][0]['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_tsne['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_tsne['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_tsne, scatterplot_fig_trimap, \
+               scatterplot_fig_umap, scatterplot_fig_pca
 
 
 @app.callback(
@@ -384,11 +719,22 @@ def euclidean_cifar_tsne_scatterplot_clicked_display(click_data, scatterplot_fig
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
     Input('euclidean-mnist-tsne-plot-click', 'data'),
     State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_mnist_tsne_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig):
+def euclidean_mnist_tsne_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig_tsne,
+                                                                scatterplot_fig_trimap, scatterplot_fig_umap,
+                                                                scatterplot_fig_pca):
     global euclidean_image_lock
     dataset = json.loads(click_data['graphId'])['dataset']
     click_data = {key: value for key, value in click_data.items() if key in ['x', 'y']}
@@ -397,9 +743,20 @@ def euclidean_mnist_tsne_scatterplot_empty_area_clicked_display(click_data, scat
         original_image_object = get_blank_image_base64()
         clicked_x = click_data['x']
         clicked_y = click_data['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_tsne['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_tsne['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_tsne, scatterplot_fig_trimap, \
+               scatterplot_fig_umap, scatterplot_fig_pca
 
 
 @app.callback(
@@ -407,12 +764,26 @@ def euclidean_mnist_tsne_scatterplot_empty_area_clicked_display(click_data, scat
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'},
            'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
     Input('euclidean-fashion-mnist-tsne-plot-click', 'data'),
     State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'},
           'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'},
+          'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'},
+          'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'},
+          'figure'),
     prevent_initial_call=True
 )
-def euclidean_fashion_mnist_tsne_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig):
+def euclidean_fashion_mnist_tsne_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig_tsne,
+                                                                        scatterplot_fig_trimap, scatterplot_fig_umap,
+                                                                        scatterplot_fig_pca):
     global euclidean_image_lock
     dataset = json.loads(click_data['graphId'])['dataset']
     click_data = {key: value for key, value in click_data.items() if key in ['x', 'y']}
@@ -421,9 +792,20 @@ def euclidean_fashion_mnist_tsne_scatterplot_empty_area_clicked_display(click_da
         original_image_object = get_blank_image_base64()
         clicked_x = click_data['x']
         clicked_y = click_data['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_tsne['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_tsne['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_tsne, scatterplot_fig_trimap, \
+               scatterplot_fig_umap, scatterplot_fig_pca
 
 
 @app.callback(
@@ -431,11 +813,22 @@ def euclidean_fashion_mnist_tsne_scatterplot_empty_area_clicked_display(click_da
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
     Input('euclidean-cifar-tsne-plot-click', 'data'),
     State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_cifar_tsne_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig):
+def euclidean_cifar_tsne_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig_tsne,
+                                                                scatterplot_fig_trimap, scatterplot_fig_umap,
+                                                                scatterplot_fig_pca):
     global euclidean_image_lock
     dataset = json.loads(click_data['graphId'])['dataset']
     click_data = {key: value for key, value in click_data.items() if key in ['x', 'y']}
@@ -444,9 +837,20 @@ def euclidean_cifar_tsne_scatterplot_empty_area_clicked_display(click_data, scat
         original_image_object = get_blank_image_base64()
         clicked_x = click_data['x']
         clicked_y = click_data['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_tsne['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_tsne['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_pca['data'][1]['x'] = []
+        scatterplot_fig_pca['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_tsne, scatterplot_fig_trimap, \
+               scatterplot_fig_umap, scatterplot_fig_pca
 
 
 @app.callback(
@@ -454,20 +858,42 @@ def euclidean_cifar_tsne_scatterplot_empty_area_clicked_display(click_data, scat
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
     Input({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'clickData'),
     State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_mnist_pca_scatterplot_clicked_display(click_data, scatterplot_fig):
+def euclidean_mnist_pca_scatterplot_clicked_display(click_data, scatterplot_fig_pca, scatterplot_fig_trimap,
+                                                    scatterplot_fig_umap, scatterplot_fig_tsne):
     global euclidean_image_lock
     with euclidean_image_lock:
         reconstructed_image_object = recon_image.display_euclidean_recon_image(click_data, 'MNIST', 'PCA')
-        original_image_object = original_image.display_euclidean_original_image(click_data, 'MNIST', scatterplot_fig)
+        original_image_object = original_image.display_euclidean_original_image(click_data, 'MNIST',
+                                                                                scatterplot_fig_pca)
         clicked_x = click_data['points'][0]['x']
         clicked_y = click_data['points'][0]['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_pca['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_pca['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_pca, scatterplot_fig_trimap, \
+               scatterplot_fig_umap, scatterplot_fig_tsne
 
 
 @app.callback(
@@ -475,23 +901,47 @@ def euclidean_mnist_pca_scatterplot_clicked_display(click_data, scatterplot_fig)
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
     Input({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'},
           'clickData'),
     State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'},
           'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'},
+          'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'},
+          'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'},
+          'figure'),
     prevent_initial_call=True
 )
-def euclidean_fashion_mnist_pca_scatterplot_clicked_display(click_data, scatterplot_fig):
+def euclidean_fashion_mnist_pca_scatterplot_clicked_display(click_data, scatterplot_fig_pca, scatterplot_fig_trimap,
+                                                            scatterplot_fig_umap, scatterplot_fig_tsne):
     global euclidean_image_lock
     with euclidean_image_lock:
         reconstructed_image_object = recon_image.display_euclidean_recon_image(click_data, 'FashionMNIST', 'PCA')
         original_image_object = original_image.display_euclidean_original_image(click_data, 'FashionMNIST',
-                                                                                scatterplot_fig)
+                                                                                scatterplot_fig_pca)
         clicked_x = click_data['points'][0]['x']
         clicked_y = click_data['points'][0]['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_pca['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_pca['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_pca, scatterplot_fig_trimap, \
+               scatterplot_fig_umap, scatterplot_fig_tsne
 
 
 @app.callback(
@@ -499,22 +949,43 @@ def euclidean_fashion_mnist_pca_scatterplot_clicked_display(click_data, scatterp
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
     Input({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'},
           'clickData'),
     State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_cifar_pca_scatterplot_clicked_display(click_data, scatterplot_fig):
+def euclidean_cifar_pca_scatterplot_clicked_display(click_data, scatterplot_fig_pca, scatterplot_fig_trimap,
+                                                    scatterplot_fig_umap, scatterplot_fig_tsne):
     global euclidean_image_lock
     with euclidean_image_lock:
         reconstructed_image_object = recon_image.display_euclidean_recon_image(click_data, 'CIFAR-100', 'PCA')
         original_image_object = original_image.display_euclidean_original_image(click_data, 'CIFAR-100',
-                                                                                scatterplot_fig)
+                                                                                scatterplot_fig_pca)
         clicked_x = click_data['points'][0]['x']
         clicked_y = click_data['points'][0]['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_pca['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_pca['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_pca, scatterplot_fig_trimap, \
+               scatterplot_fig_umap, scatterplot_fig_tsne
 
 
 @app.callback(
@@ -522,11 +993,21 @@ def euclidean_cifar_pca_scatterplot_clicked_display(click_data, scatterplot_fig)
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
     Input('euclidean-mnist-pca-plot-click', 'data'),
     State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'MNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_mnist_pca_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig):
+def euclidean_mnist_pca_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig_pca, scatterplot_fig_trimap,
+                                                               scatterplot_fig_umap, scatterplot_fig_tsne):
     global euclidean_image_lock
     dataset = json.loads(click_data['graphId'])['dataset']
     click_data = {key: value for key, value in click_data.items() if key in ['x', 'y']}
@@ -535,9 +1016,20 @@ def euclidean_mnist_pca_scatterplot_empty_area_clicked_display(click_data, scatt
         original_image_object = get_blank_image_base64()
         clicked_x = click_data['x']
         clicked_y = click_data['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_pca['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_pca['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_pca, scatterplot_fig_trimap, \
+               scatterplot_fig_umap, scatterplot_fig_tsne
 
 
 @app.callback(
@@ -545,11 +1037,22 @@ def euclidean_mnist_pca_scatterplot_empty_area_clicked_display(click_data, scatt
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'},
+           'figure', allow_duplicate=True),
     Input('euclidean-fashion-mnist-pca-plot-click', 'data'),
     State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'FashionMNIST', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_fashion_mnist_pca_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig):
+def euclidean_fashion_mnist_pca_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig_pca,
+                                                                       scatterplot_fig_trimap, scatterplot_fig_umap,
+                                                                       scatterplot_fig_tsne):
     global euclidean_image_lock
     dataset = json.loads(click_data['graphId'])['dataset']
     click_data = {key: value for key, value in click_data.items() if key in ['x', 'y']}
@@ -558,9 +1061,20 @@ def euclidean_fashion_mnist_pca_scatterplot_empty_area_clicked_display(click_dat
         original_image_object = get_blank_image_base64()
         clicked_x = click_data['x']
         clicked_y = click_data['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_pca['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_pca['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_pca, scatterplot_fig_trimap, \
+               scatterplot_fig_umap, scatterplot_fig_tsne
 
 
 @app.callback(
@@ -568,11 +1082,21 @@ def euclidean_fashion_mnist_pca_scatterplot_empty_area_clicked_display(click_dat
     Output('original-image-euclidean', 'src', allow_duplicate=True),
     Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure',
            allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
+    Output({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure',
+           allow_duplicate=True),
     Input('euclidean-cifar-pca-plot-click', 'data'),
     State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'PCA', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'TriMap', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 'UMAP', 'type': 'scatterplot'}, 'figure'),
+    State({'dashboard': 'euclidean', 'dataset': 'CIFAR-100', 'projection': 't_SNE', 'type': 'scatterplot'}, 'figure'),
     prevent_initial_call=True
 )
-def euclidean_cifar_pca_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig):
+def euclidean_cifar_pca_scatterplot_empty_area_clicked_display(click_data, scatterplot_fig_pca, scatterplot_fig_trimap,
+                                                               scatterplot_fig_umap, scatterplot_fig_tsne):
     global euclidean_image_lock
     dataset = json.loads(click_data['graphId'])['dataset']
     click_data = {key: value for key, value in click_data.items() if key in ['x', 'y']}
@@ -581,9 +1105,20 @@ def euclidean_cifar_pca_scatterplot_empty_area_clicked_display(click_data, scatt
         original_image_object = get_blank_image_base64()
         clicked_x = click_data['x']
         clicked_y = click_data['y']
-        scatterplot_fig['data'][1]['x'] = [clicked_x]
-        scatterplot_fig['data'][1]['y'] = [clicked_y]
-        return reconstructed_image_object, original_image_object, scatterplot_fig
+        scatterplot_fig_pca['data'][1]['x'] = [clicked_x]
+        scatterplot_fig_pca['data'][1]['y'] = [clicked_y]
+
+        scatterplot_fig_trimap['data'][1]['x'] = []
+        scatterplot_fig_trimap['data'][1]['y'] = []
+
+        scatterplot_fig_umap['data'][1]['x'] = []
+        scatterplot_fig_umap['data'][1]['y'] = []
+
+        scatterplot_fig_tsne['data'][1]['x'] = []
+        scatterplot_fig_tsne['data'][1]['y'] = []
+
+        return reconstructed_image_object, original_image_object, scatterplot_fig_pca, scatterplot_fig_trimap, \
+               scatterplot_fig_umap, scatterplot_fig_tsne
 
 
 @app.callback(
