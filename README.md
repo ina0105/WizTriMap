@@ -80,7 +80,7 @@ To access the results as shown in the Demo presentation of this system, one must
    <br>
    1.2 For each sample, compute latent embeddings on-the-fly (TriMap: 2D–7D, others: only 2D) \
    <br>
-   1.3 Train inversion models to reconstruct images from embeddings and save the best model per dataset-method-dim in `saved_models/` \
+   1.3 Train inversion models to reconstruct images from embeddings and save the best model per dataset-method-dim in `../multi_dimension_inversion_models/` \
    <br>
    1.4 Compute and save reconstruction errors as `.npy` files and 20 reconstructed image samples in `recon_output/<dataset>/<method>_<dim>D/`
 
@@ -90,8 +90,10 @@ To access the results as shown in the Demo presentation of this system, one must
    2.2 Training inversion models to invert from those embeddings to the original image
 
 #### 3. Running the Demo
-   3.1 After running the above two steps to get the necessary models, the main ui is 
-   ready to run. \
+   3.1 Either run the above two steps to train and save the models or copy the saved models 
+   from the link <a>https://drive.google.com/drive/folders/1z4xYzHzD1oiJcL_TKMwGOQyzXkS0nQSP?usp=drive_link
+   <br><br>
+   After this, the main ui is ready to run. \
    <br>
    3.2 On the first run, the embeddings for each DR method will be computed and saved 
    inside a folder in the main working directory. This would ensure faster reload for 
@@ -102,18 +104,18 @@ To access the results as shown in the Demo presentation of this system, one must
 The code can easily be updated to accommodate other datasets, keeping in mind that adding a dataset cannot be visualized in real-time as the computation of embeddings and the training of the models will take a prolonged period of time.
 
 ## Usage
-To run the dashboard, either download the saved models and CNN embeddings from the link and follow the steps under 'Running the Demo' or run the CNN and Initial Data steps, which will save the models and embeddings and then run the demo.
+To run the dashboard, either download the saved models and CNN embeddings from <a>https://drive.google.com/drive/folders/1z4xYzHzD1oiJcL_TKMwGOQyzXkS0nQSP?usp=drive_link and follow the steps under 'Running the Demo' or run the CNN and Initial Data steps, which will save the models and embeddings and then run the demo.
 
 ### CNN
 ```bash
-python cnn/extract_embeddings_cnn.py
-python cnn/train_inversion_models_cnn.py
+python preprocessing/extract_embeddings_cnn.py
+python preprocessing/train_inversion_models_cnn.py
 ```
 ### Initial Data
 Run the 'run_inference.py' for inference, which will save 20 random reconstructed images and reconstructed errors of the test data as .npy file.
 ```bash
-python initial_data/train_inversion_models.py
-python initial_data/run_inference.py
+python preprocessing/train_inversion_models.py
+python preprocessing/run_inference.py
 ```
 ### Running the Demo
 Run the 'main_ui.py' for running the main dash app.
