@@ -23,7 +23,7 @@ from .utils.models import ConvDecoderV2, ConvDecoderGrayV2, InversionMLP, Invers
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # === Config ===
-DATASETS = ["CIFAR100", "MNIST", "FashionMNIST"]
+DATASETS = ["CIFAR_100", "MNIST", "FashionMNIST"]
 METHODS_2D = ["TriMap", "UMAP", "t-SNE", "PCA"]
 
 # ===Save Image ===
@@ -233,32 +233,21 @@ def main(args):
         print(f"\nLoading full dataset: {dataset}")
         X, X_flat = load_dataset(dataset)
         for method in METHODS_2D:
-            for layer in range(3): 
+            for layer in range(1,4): 
                 #check if model already exists
-                model_path = os.path.join(args.save_dir, f"{dataset}_{method}_{layer}D.pth")
+                model_path = os.path.join(args.save_dir, f"{dataset}_{method}_{layer}layer.pth")
                 if os.path.exists(model_path):
                     print(f"[SKIP] Model {model_path} already exists. Skipping...")
                     continue
                 print(f"Projecting {dataset} using {method} (layer {layer})")
                 
                 # Map dataset and method names to their format in the embedding files(only for cnn)
-                embedding_dataset_name = dataset
-                if dataset == "CIFAR100":
-                    embedding_dataset_name = 'imagenet'
-                elif dataset == "FashionMNIST":
-                    embedding_dataset_name = 'fashion_mnist'
-                elif dataset == "MNIST":
-                    embedding_dataset_name = 'mnist'
-                
-                embedding_method_name = method
-                if method == "TriMap":
-                    embedding_method_name = 'Trimap'
 
-                emb = load_emmbeddings(dataset=embedding_dataset_name, method=embedding_method_name, layer=layer)
+                emb = load_emmbeddings(dataset=dataset, method=method, layer=layer)
                 dim = 2 
                 save_path = os.path.join(args.save_dir, f"{dataset}_{method}_layer{layer}.pth")
 
-                if embedding_dataset_name == "imagenet" or dataset == "CIFAR100":
+                if dataset == "CIFAR100":
                     if X.shape[1] == 1:  
                         print("Loading CIFAR data for reconstruction...")
                         cifar_X, _ = load_dataset("CIFAR100")
@@ -286,7 +275,7 @@ def main(args):
                     epochs = args.epochs_mnist
 
                 recon_mse = train_model(X_img, emb, model, loss_fn, save_path,
-                                    epochs, embedding_method_name, embedding_dataset_name, dim, visualize=args.visualize)
+                                    epochs, method, dataset, dim, visualize=args.visualize)
 
                 key = f"{dataset}_{method}_layer{layer}"
                 recon_errors[key] = recon_mse

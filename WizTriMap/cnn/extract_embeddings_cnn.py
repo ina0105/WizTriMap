@@ -51,7 +51,7 @@ def get_dataloader(dataset_name, batch_size=64, imagenet_subset=10000):
             transforms.Normalize((0.5,), (0.5,))
         ])
         dataset = torchvision.datasets.FashionMNIST(root='./data', train=True, download=True, transform=transform)
-    elif dataset_name == 'imagenet':
+    elif dataset_name == 'cifar10':
         # Use CIFAR-100, resize to 28x28
         transform = transforms.Compose([
         transforms.Resize((28, 28)),  # Resize to match MNIST dimensions
@@ -79,20 +79,25 @@ def train_model(model, dataloader, device, epochs=1):
 
 if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    datasets = ['mnist', 'fashion_mnist', 'imagenet']  
-    out_dir = 'embeddings_output'
+    datasets = ['mnist', 'fashion_mnist', 'cifar10']  
+    out_dir = 'cnn_layer_embeddings_trimap'
+    os.makedirs(out_dir, exist_ok=True)
     for dataset_name in datasets:
         print(f'Processing {dataset_name}...')
         if dataset_name == 'mnist':
             dim = 1
             num_classes = 10
+            dataset_n="MNIST"
         elif dataset_name == 'fashion_mnist':
             dim = 1
             num_classes = 10
-        elif dataset_name == 'imagenet':
+            dataset_n="FashionMNIST"
+        elif dataset_name == 'cifar10':
             dim = 3
             num_classes = 100
-        dataloader = get_dataloader(dataset_name, batch_size=128, imagenet_subset=10000)
+            dataset_n="CIFAR_100"
+
+        dataloader = get_dataloader(dataset_name, batch_size=128)
         model = CNN5Layer(num_classes=num_classes,dimension=dim).to(device)
         for images, labels in dataloader:
             print(images.shape)
@@ -114,13 +119,12 @@ if __name__ == '__main__':
         for i in range(3):
             all_embeddings[i] = torch.cat(all_embeddings[i], dim=0)
         all_labels = torch.cat(all_labels, dim=0)
-        methods=['PCA', 't-SNE', 'UMAP', 'Trimap']
+        methods=['PCA', 't-SNE', 'UMAP', 'TriMap']
         figures = {}
-        os.makedirs(out_dir, exist_ok=True)
         # Check if embeddings already exist
         for method in methods:
-            for layer in range(3):
-                file_path = os.path.join(out_dir, f'{dataset_name}_{method}_layer{layer}_embeddings.pt')
+            for layer in range(1, 4):
+                file_path = os.path.join("..", out_dir, f'{dataset_n}_{method}_layer{layer}_embeddings.pt')
 
                 # Perform dimensionality reduction
                 if method == 'PCA':
