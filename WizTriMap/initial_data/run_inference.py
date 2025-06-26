@@ -12,12 +12,12 @@ from tqdm import tqdm
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-ALL_DATASETS = ["MNIST", "FashionMNIST", "CIFAR100"]
-ALL_METHODS = ["TriMap", "UMAP", "t-SNE", "PCA"]
+ALL_DATASETS = ["MNIST", "FashionMNIST", "CIFAR_100"]
+ALL_METHODS = ["TriMap", "UMAP", "t_SNE", "PCA"]
 
 def load_model(dataset, method, dim, save_dir):
     path = os.path.join(save_dir, f"{dataset}_{method}_{dim}D.pth")
-    if dataset == "CIFAR100":
+    if dataset == "CIFAR_100":
         model = ConvDecoderV2(input_dim=dim).to(device)
     else:
         model = ConvDecoderGrayV2(input_dim=dim).to(device)
@@ -50,12 +50,12 @@ def run_all(args):
                     batch = emb_tensor[i : i + batch_size]
                     output = model(batch).cpu()
 
-                    if dataset == "CIFAR100":
+                    if dataset == "CIFAR_100":
                         target = X[i : i + batch_size].view(-1, 3, 32, 32)
-                        recon = output
                     else:
                         target = X[i : i + batch_size].view(-1, 1, 28, 28)
-                        recon = output
+
+                    recon = output 
 
                     batch_errors = F.mse_loss(recon, target, reduction="none").mean(dim=(1, 2, 3)).numpy()
                     recon_errors[i : i + batch_size] = batch_errors
@@ -65,14 +65,22 @@ def run_all(args):
                         if global_idx not in save_indices:
                             continue
                         recon_img = recon[j]
+                        orig_img = target[j]
                         class_name = class_names[y_true[global_idx]]
                         safe_class_name = class_name.replace("/", "_").replace(" ", "_")
                         if dataset == "CIFAR100":
                             img = recon_img.permute(1, 2, 0).numpy()
+                            orig_np = orig_img.permute(1, 2, 0).numpy()
                         else:
                             img = recon_img[0].numpy()
-                        filename = f"sample_{global_idx:04d}_true_{safe_class_name}.png"
+                            orig_np = orig_img[0].numpy()
+                        # Save reconstructed image
+                        filename = f"recon_{global_idx:04d}_true_{safe_class_name}.png"
                         save_image(img, os.path.join(save_path, filename), resize_factor=4)
+
+                        # Save original image
+                        orig_filename = f"orig_{global_idx:04d}_true_{safe_class_name}.png"
+                        save_image(orig_np, os.path.join(save_path, orig_filename), resize_factor=4)
 
             # Save recon error
             np.save(os.path.join(save_path, "recon_errors.npy"), recon_errors)
@@ -80,7 +88,7 @@ def run_all(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dim", type=int, required=True, help="Embedding dimensionality (e.g., 2, 3, ..., 10)")
+    parser.add_argument("--dim", type=int, required=True, help="Embedding dimensionality (e.g., 2, 3, ..., 7)")
     parser.add_argument("--save-dir", type=str, default="saved_models", help="Path to saved .pth models")
     parser.add_argument("--output-dir", type=str, default="recon_output", help="Where to save reconstructed images and errors")
     args = parser.parse_args()
