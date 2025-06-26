@@ -2,8 +2,7 @@
 
 In this work, we aim to enhance TriMap by making it more expressive and scalable for practical applications. Our target users include AI practitioners, developers, and machine learning researchers who seek to visually analyze latent spaces, explore data structures, and assess how classifiers separate different classes. To address these needs, we present a user-centered extension of TriMap that introduces new functionalities.
 
-https://github.com/user-attachments/assets/30385386-96bc-4f97-9dcc-ddb04c1f1866
-
+https://github.com/user-attachments/assets/c75b4f4e-912e-48a6-a635-1e4f115c5ffa
 ## Project Structure
 
 ```
