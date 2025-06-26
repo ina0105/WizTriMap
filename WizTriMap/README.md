@@ -11,14 +11,14 @@ WizTriMap
 ├──
 ├── utils
 │   ├── utils.py
+|   ├── save_projections.py
 │   └── models.py
 ├── cnn
 │   ├── extract_embeddings_cnn.py
 │   └── train_inversion_models_cnn.py
 ├── initial data
 │   ├── train_inversion_models.py
-│   ├── save_projections.py
-│   └── run_intference.py
+│   └── run_inference.py
 ├── additional experiments
 │   ├── hyperbolic.py
 │   └── hyperbolic-corr-fashionmnist.py
@@ -61,10 +61,17 @@ To access the results as shown in the Demo presentation of this system, one must
 The code can easily be updated to accommodate other datasets, keeping in mind that adding a dataset cannot be visualized in real-time as the computation of embeddings and the training of the models will take a prolonged period of time.
 
 ## Usage
+To run the dashboard, either download the saved models and CNN embeddings from the link and follow the steps under 'Running the Demo' or run the CNN and Initial Data steps, which will save the models and embeddings and then run the demo.
+
 ### CNN
 ```bash
 python cnn/extract_embeddings_cnn.py
 python cnn/train_inversion_models_cnn.py
 ```
 ### Initial Data
+Run the 'run_inference.py' for inference, which will save 20 random reconstructed images and reconstructed errors of the test data as .npy file.
+```bash
+python initial_data/train_inversion_models.py
+python initial_data/run_inference.py
+```
 ### Running the Demo
