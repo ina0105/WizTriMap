@@ -139,7 +139,7 @@ def main(args):
     os.makedirs(args.save_dir, exist_ok=True)
     recon_errors = {}
 
-    TRIMAP_DIMS = [2**i for i in range(2, args.ndims + 1)] #list(range(2, args.ndims+1))   2D to 10D
+    TRIMAP_DIMS = list(range(2, args.ndims+1)) #[2**i for i in range(2, args.ndims + 1)]  2D to 10D
 
     for dataset in DATASETS:
         print(f"\nLoading full dataset: {dataset}")
@@ -180,14 +180,14 @@ def main(args):
 # === Main with argparse ===
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train and save inversion models for DR embeddings")
-    parser.add_argument("--epochs-cifar", type=int, default=1000, help="Epochs for CIFAR100 models")
-    parser.add_argument("--epochs-mnist", type=int, default=800, help="Epochs for MNIST and FashionMNIST models")
-    parser.add_argument("--ndims", type=int, default=6, help="Number of dimensions in power of 2 to reduce to for TriMap")
+    parser.add_argument("--epochs-cifar", type=int, default=500, help="Epochs for CIFAR100 models")
+    parser.add_argument("--epochs-mnist", type=int, default=300, help="Epochs for MNIST and FashionMNIST models")
+    parser.add_argument("--ndims", type=int, default=7, help="Number of dimensions in power of 2 to reduce to for TriMap")
     parser.add_argument("--lr", type=int, default=0.0001, help="Learning rate")
     parser.add_argument("--train_batchsize", type=int, default=64, help="Training Batch size")
     parser.add_argument("--val_batchsize", type=int, default=64, help="Validation Batch size")
     parser.add_argument("--save-dir", type=str, default="saved_models", help="Directory to save trained models")
-    parser.add_argument("--visualize", action="store_true", help="Enable visualization every 10 epochs (TriMap only)")
+    parser.add_argument("--visualize", action="store_true", help="Enable visualization every 100 epochs (TriMap only)")
 
     args = parser.parse_args()
 
