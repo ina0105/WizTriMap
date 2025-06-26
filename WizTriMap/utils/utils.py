@@ -17,7 +17,7 @@ def load_dataset(name, train=False):
     elif name == "FashionMNIST":
         dataset = FashionMNIST("./data", train=train, download=True, transform=transform)
         X = torch.stack([img[0].squeeze() for img in dataset])
-    elif name == "CIFAR100":
+    elif name == "CIFAR_100":
         dataset = CIFAR100("./data", train=train, download=True, transform=transform)
         X = torch.stack([img[0] for img in dataset])
     else:
@@ -27,7 +27,7 @@ def load_dataset(name, train=False):
     return X, X_flat, y
 
 def get_class_names(dataset_name):
-    if dataset_name == "CIFAR100":
+    if dataset_name == "CIFAR_100":
         return CIFAR100("./data", train=False).classes
     elif dataset_name == "FashionMNIST":
         return FashionMNIST("./data", train=False).classes
@@ -67,7 +67,7 @@ def project(method, X_flat, dim=2):
         return trimap.TRIMAP(n_dims=dim).fit_transform(X_flat)
     elif method == "UMAP":
         return umap.UMAP(n_components=dim).fit_transform(X_flat)
-    elif method == "t-SNE":
+    elif method == "t_SNE":
         return TSNE(n_components=dim).fit_transform(X_flat)
     elif method == "PCA":
         return PCA(n_components=dim).fit_transform(X_flat)

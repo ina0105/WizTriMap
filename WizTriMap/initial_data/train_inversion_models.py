@@ -24,13 +24,13 @@ from torch.utils.data import DataLoader, TensorDataset
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # === Config ===
-DATASETS = ["CIFAR100", "FashionMNIST", "MNIST"]
-METHODS_2D = ["TriMap", "UMAP", "t-SNE", "PCA"]
+DATASETS = ["CIFAR_100", "FashionMNIST", "MNIST"]
+METHODS_2D = ["TriMap", "UMAP", "t_SNE", "PCA"]
 
 
 # === Training Function ===
 def train_model(X_tensor, embedding, model, loss_fn, save_path, epochs, method, dataset, dim, 
-                learning_rate=0.0001, train_batch_size=64, val_batch_size=64, patience=30, visualize=False):
+                learning_rate=0.0001, train_batch_size=64, val_batch_size=64, visualize=False):
     # Convert full tensors
     embedding_tensor = torch.tensor(embedding, dtype=torch.float32)
     image_tensor = X_tensor.cpu()   # Keep on CPU until batching to GPU
@@ -45,7 +45,7 @@ def train_model(X_tensor, embedding, model, loss_fn, save_path, epochs, method, 
     val_loader = DataLoader(val_ds, batch_size=val_batch_size)
 
     optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-4)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=10, verbose=False)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=20, verbose=False)
 
     best_val_loss = float("inf")
     best_state_dict = None
@@ -136,7 +136,7 @@ def train_model(X_tensor, embedding, model, loss_fn, save_path, epochs, method, 
 
 # === Main Script ===
 def main(args):
-    os.makedirs(args.save_dir, exist_ok=True)
+    os.makedirs(os.path.join("..", args.save_dir), exist_ok=True)
     recon_errors = {}
 
     TRIMAP_DIMS = list(range(2, args.ndims+1)) #[2**i for i in range(2, args.ndims + 1)]  2D to 10D
@@ -152,9 +152,10 @@ def main(args):
                 print(f"Projecting {dataset} using {method} ({dim}D)")
                 emb = project(method, X_flat, dim)
 
-                save_path = os.path.join(args.save_dir, f"{dataset}_{method}_{dim}D.pth")
+                save_path_1 = os.path.join("..", args.save_dir)
+                save_path = os.path.join(save_path_1, f"{dataset}_{method}_{dim}D.pth")
 
-                if dataset == "CIFAR100":
+                if dataset == "CIFAR_100":
                     model = ConvDecoderV2(input_dim=dim).to(device)
                     X_img = X_tensor.view(-1, 3, 32, 32)
                     loss_fn = lambda o, t: combined_ssim_mse_loss(o, t, alpha=0.3)
@@ -165,14 +166,14 @@ def main(args):
                     loss_fn = lambda o, t: combined_ssim_mse_loss(o, t, alpha=0.5)
                     epochs = args.epochs_mnist
 
-                recon_mse = train_model(X_img, emb, model, loss_fn, save_path,
-                                    epochs, method, dataset, dim, learning_rate=args.lr, train_batch_size=args.train_batchsize, val_batch_size=args.val_batchsize, 
-                                    patience=40, visualize=args.visualize)
+                recon_mse = train_model(X_img, emb, model, loss_fn, save_path, epochs, method, 
+                                        dataset, dim, learning_rate=args.lr, train_batch_size=args.train_batchsize, 
+                                        val_batch_size=args.val_batchsize, visualize=args.visualize)
 
                 key = f"{dataset}_{method}_{dim}D"
                 recon_errors[key] = recon_mse
 
-    with open(os.path.join(args.save_dir, "recon_errors.json"), "w") as f:
+    with open(os.path.join(save_path_1, "recon_errors.json"), "w") as f:
         json.dump(recon_errors, f, indent=2)
 
     print("[SAVED] Reconstruction error summary at recon_errors.json")
@@ -186,7 +187,7 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=int, default=0.0001, help="Learning rate")
     parser.add_argument("--train_batchsize", type=int, default=64, help="Training Batch size")
     parser.add_argument("--val_batchsize", type=int, default=64, help="Validation Batch size")
-    parser.add_argument("--save-dir", type=str, default="saved_models", help="Directory to save trained models")
+    parser.add_argument("--save-dir", type=str, default="multi_dimension_inversion_models", help="Directory to save trained models")
     parser.add_argument("--visualize", action="store_true", help="Enable visualization every 100 epochs (TriMap only)")
 
     args = parser.parse_args()
