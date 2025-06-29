@@ -8,8 +8,10 @@ https://github.com/user-attachments/assets/c75b4f4e-912e-48a6-a635-1e4f115c5ffa
 ```
 WizTriMap
 ├── additional_experiments
-│    ├── hyperbolic.ipynb
-│    └── hyperbolic-corr-fashionmnist.ipynb
+│    ├── hyperbolic.ipynb, 
+│    ├── hyperbolic-corr-fashionmnist.ipynb
+│    ├── case_study_cifar100.ypnb
+│    └── embeddings_EV.ypnb
 ├── assets
 │    ├── clientside.js
 │    └── main.css
